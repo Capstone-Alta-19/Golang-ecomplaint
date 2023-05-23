@@ -3,38 +3,27 @@ package controller
 import (
 	"net/http"
 
-	"project_structure/model"
-	"project_structure/usecase"
+	"capstone/model/payload"
+	"capstone/usecase"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func LoginUserController(c echo.Context) error {
-	user := model.User{}
-	c.Bind(&user)
+	req := payload.LoginUserRequest{}
+	c.Bind(&req)
 
-	err := usecase.LoginUser(&user)
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	user, err := usecase.LoginUser(req.UsernameOrEmail, req.Password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success login",
-		"user":   user,
-	})
-}
-
-func LoginAdminController(c echo.Context) error {
-	admin := model.User{}
-	c.Bind(&admin)
-
-	err := usecase.LoginAdmin(&admin)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success login",
-		"admin":  admin,
+		"message": "success login",
+		"user":    user,
 	})
 }

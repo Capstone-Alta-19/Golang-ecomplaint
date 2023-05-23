@@ -4,6 +4,6 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 COPY . ./
-RUN go build -o /docker-alta
+RUN go build -o /capstone-project
 EXPOSE  8080
-CMD ["/docker-alta"]
+CMD ["/capstone-project"]
