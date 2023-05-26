@@ -45,7 +45,6 @@ func InitDB() *gorm.DB {
 	}
 
 	InitialMigration()
-
 	return DB
 }
 
@@ -53,5 +52,6 @@ func InitialMigration() {
 	DB.AutoMigrate(
 		&model.User{},
 		&model.Admin{},
+		&model.Complaint{},
 	)
 }
