@@ -1,123 +1,91 @@
 package usecase
 
 import (
+	"capstone/middleware"
+	"capstone/model"
+	"capstone/model/payload"
+	"capstone/repository/database"
+	"errors"
 	"fmt"
-	"project_structure/middleware"
-	"project_structure/model"
-	"project_structure/model/payload"
-	"project_structure/repository/database"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
-func LoginUser(user *model.User) (err error) {
+func LoginUser(usernameOrEmail, password string) (*payload.LoginUserResponse, error) {
 	// check to db email and password
-	err = database.LoginUser(user)
+	user, err := database.GetUserByUsernameOrEmail(usernameOrEmail)
 	if err != nil {
-		fmt.Println("GetUser : Error getting user from database")
-		return
+		fmt.Println("LoginUser: Error getting user from the database")
+		return nil, err
 	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return nil, errors.New("wrong password")
+	}
+
 	// generate jwt
-	token, err := middleware.CreateToken(int(user.ID), user.Role)
+	token, err := middleware.CreateToken(user.ID, user.Role)
 	if err != nil {
-		fmt.Println("GetUser : Error Generate token")
-		return
+		fmt.Println("LoginUser: Error generating token")
+		return nil, err
 	}
+
 	user.Token = token
-	return
+	res := payload.LoginUserResponse{
+		Token: token,
+	}
+	return &res, nil
 }
 
-func LoginAdmin(admin *model.User) (err error) {
-	// check to db email and password
-	err = database.LoginAdmin(admin)
-	if err != nil {
-		fmt.Println("GetAdmin : Error getting admin from database")
-		return
-	}
-	// generate jwt
-	token, err := middleware.CreateToken(int(admin.ID), admin.Role)
-	if err != nil {
-		fmt.Println("GetUser : Error Generate token")
-		return
-	}
-	admin.Token = token
-	return
-}
+func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, error) {
 
-func CreateUser(req *payload.CreateUserRequest) (resp payload.CreateUserResponse, err error) {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := database.GetUserByEmail(req.Email); err == nil {
+		return nil, errors.New("email already registered")
+	}
+
 	newUser := &model.User{
-		Name:     req.Name,
+		Username: req.Username,
 		Email:    req.Email,
-		Password: req.Password,
-		Address:  req.Address,
+		Password: string(passwordHash),
+		Phone:    req.Phone,
 		Role:     "USER",
 	}
+
 	err = database.CreateUser(newUser)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	// generate jwt
-	token, err := middleware.CreateToken(int(newUser.ID), newUser.Role)
+	token, err := middleware.CreateToken(newUser.ID, newUser.Role)
 	if err != nil {
 		fmt.Println("GetUser : Error Generate token")
-		return
+		return nil, err
 	}
+
 	newUser.Token = token
 	err = database.UpdateUser(newUser)
 	if err != nil {
 		fmt.Println("UpdateUser : Error Update user")
-		return
-	}
-	resp = payload.CreateUserResponse{
-		UserID: newUser.ID,
-		Token:  newUser.Token,
-	}
-	return
-}
-
-func CreateAdmin(req *payload.CreateUserRequest) (resp payload.CreateUserResponse, err error) {
-	newUser := &model.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: req.Password,
-		Address:  req.Address,
-		Role:     "ADMIN",
-	}
-	err = database.CreateUser(newUser)
-	if err != nil {
-		return
-	}
-
-	// generate jwt
-	token, err := middleware.CreateToken(int(newUser.ID), newUser.Role)
-	if err != nil {
-		fmt.Println("GetAdmin : Error Generate token")
-		return
-	}
-	newUser.Token = token
-	err = database.UpdateUser(newUser)
-	if err != nil {
-		fmt.Println("UpdateAdmin : Error Update admin")
-		return
-	}
-	resp = payload.CreateUserResponse{
-		UserID: newUser.ID,
-		Token:  newUser.Token,
-	}
-	return
-}
-
-func GetUserByEmail(email string) (*model.User, error) {
-	user, err := database.GetUserByEmail(email)
-	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	result := payload.CreateUserResponse{
+		Token: newUser.Token,
+	}
+	return &result, nil
 }
 
 func GetListUsers() (users []model.User, err error) {
 	users, err = database.GetUsers()
 	if err != nil {
-		fmt.Println("GetListUsers : Error getting users from database")
+		fmt.Println("GetListUsers: Error getting users from the database")
 		return
 	}
 	return
@@ -126,22 +94,8 @@ func GetListUsers() (users []model.User, err error) {
 func UpdateUser(user *model.User) (err error) {
 	err = database.UpdateUser(user)
 	if err != nil {
-		fmt.Println("UpdateUser : Error updating user, err: ", err)
+		fmt.Println("UpdateUser: Error updating user, err:", err)
 		return
 	}
-
 	return
-}
-
-func TopUp(userID, saldo uint) (*model.User, error) {
-	user, err := database.GetUser(userID)
-	if err != nil {
-		return nil, err
-	}
-	user.Saldo += saldo
-	err = database.UpdateUser(user)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
 }
