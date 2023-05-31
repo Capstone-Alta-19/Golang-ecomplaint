@@ -22,11 +22,11 @@ type Config struct {
 func InitDB() *gorm.DB {
 
 	config := Config{
-		DB_Username: os.Getenv("DB_Username"),
-		DB_Password: os.Getenv("DB_Password"),
-		DB_Port:     os.Getenv("DB_Port"),
-		DB_Host:     os.Getenv("DB_Host"),
-		DB_Name:     os.Getenv("DB_Name"),
+		DB_Username: os.Getenv("DB_USER"),
+		DB_Password: os.Getenv("DB_PASSWORD"),
+		DB_Port:     os.Getenv("DB_PORT"),
+		DB_Host:     os.Getenv("DB_HOST"),
+		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
