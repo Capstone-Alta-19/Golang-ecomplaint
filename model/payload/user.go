@@ -1,24 +1,26 @@
 package payload
 
 type CreateUserRequest struct {
-	Name     string `json:"name" validate:"required"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
-	Address  string `json:"address" validate:"required"`
-	Role     string `json:"role"`
+	Username        string `json:"username" validate:"required"`
+	Email           string `json:"email" validate:"required,email"`
+	Phone           string `json:"phone" validate:"required"`
+	Password        string `json:"password" validate:"required,min=6"`
+	ConfirmPassword string `json:"confirm_password" validate:"required"`
 }
 
 type CreateUserResponse struct {
-	UserID uint   `json:"user_id"`
-	Token  string `json:"token"`
+	Token string `json:"token"`
 }
 
 type LoginUserRequest struct {
-	Email    string `json:"email" form:"email" validate:"required,email"`
-	Password string `json:"password" form:"password" validate:"required,min=5"`
+	UsernameOrEmail string `json:"username_or_email" validate:"required"`
+	Password        string `json:"password" validate:"required,min=5"`
 }
 
 type LoginUserResponse struct {
-	UserID uint   `json:"user_id"`
-	Token  string `json:"token"`
+	Token string `json:"token"`
+}
+
+type OtpEmailRequest struct {
+	Email string `json:"email"`
 }

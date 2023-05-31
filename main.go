@@ -1,29 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"project_structure/config"
-	"project_structure/middleware"
-	"project_structure/route"
+	"capstone/config"
+	"capstone/middleware"
+	"capstone/route"
+	"log"
 
-	"github.com/labstack/echo"
+	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("failed to load .env")
+	}
+
 	db := config.InitDB()
 	e := echo.New()
 	middleware.Logmiddleware(e)
 
 	route.NewRoute(e, db)
 
-	port := os.Getenv("PORT")
-	const DEFAULT_PORT = "8080"
-
-	if port == "" {
-		port = DEFAULT_PORT
-	}
-	appPort := fmt.Sprintf(":%s", port)
-
-	e.Logger.Fatal(e.Start(appPort))
+	e.Logger.Fatal(e.Start(":8080"))
 }
