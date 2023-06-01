@@ -1,7 +1,7 @@
 package config
 
 import (
-	"capstone/model"
+	"Golang-ecomplaint/model"
 	"fmt"
 	"os"
 
@@ -45,6 +45,7 @@ func InitDB() *gorm.DB {
 	}
 
 	InitialMigration()
+	InitCategory()
 	return DB
 }
 
@@ -54,4 +55,22 @@ func InitialMigration() {
 		&model.Admin{},
 		&model.Complaint{},
 	)
+}
+
+func InitCategory() {
+	categories := []model.Category{
+		{Name: "Dosen dan Staff Akademik"},
+		{Name: "Sarana dan Prasarana"},
+		{Name: "Sistem Perkuliahan"},
+		{Name: "Organisasi Mahasiswa"},
+		{Name: "Sesama Mahasiswa"},
+		{Name: "Lainnya"},
+	}
+	for _, category := range categories {
+		var exist model.Category
+		err := DB.Where("name = ?", category.Name).First(&exist).Error
+		if err != nil {
+			DB.Create(&category)
+		}
+	}
 }
