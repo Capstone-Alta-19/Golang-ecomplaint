@@ -45,6 +45,7 @@ func InitDB() *gorm.DB {
 	}
 
 	InitialMigration()
+	InitCategory()
 	return DB
 }
 
@@ -53,5 +54,24 @@ func InitialMigration() {
 		&model.User{},
 		&model.Admin{},
 		&model.Complaint{},
+		&model.News{},
 	)
+}
+
+func InitCategory() {
+	categories := []model.Category{
+		{Name: "Dosen dan Staff Akademik"},
+		{Name: "Sarana dan Prasarana"},
+		{Name: "Sistem Perkuliahan"},
+		{Name: "Organisasi Mahasiswa"},
+		{Name: "Sesama Mahasiswa"},
+		{Name: "Lainnya"},
+	}
+	for _, category := range categories {
+		var exist model.Category
+		err := DB.Where("name = ?", category.Name).First(&exist).Error
+		if err != nil {
+			DB.Create(&category)
+		}
+	}
 }

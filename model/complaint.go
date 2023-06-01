@@ -13,4 +13,10 @@ type Complaint struct {
 	PhotoURL    string   `json:"photo_url"`
 	VideoURL    string   `json:"video_url"`
 	IsPublic    bool     `json:"is_public"`
+	Feedback    string   `json:"feedback"`
+}
+
+type Feedback struct {
+	gorm.Model
+	Description string `json:"description"`
 }
