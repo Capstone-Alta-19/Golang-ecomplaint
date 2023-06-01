@@ -24,12 +24,13 @@ func GetNewsController(c echo.Context) error {
 }
 
 func CreateNewsController(c echo.Context) error {
-	_, err := middleware.ExtractTokenAdminId(c, "Admin Berita")
+	role, _, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-			"message": "only admin news can access",
-			"error":   err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	if role != "admin" {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
 	}
 
 	payload := payload.CreateNews{}
@@ -68,12 +69,13 @@ func DeleteNewsController(c echo.Context) error {
 }
 
 func UpdateNewsController(c echo.Context) error {
-	_, err := middleware.ExtractTokenAdminId(c, "Admin Berita")
+	role, _, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-			"message": "only admin news can access",
-			"error":   err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	if role != "admin" {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
 	}
 
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)

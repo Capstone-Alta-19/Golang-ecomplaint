@@ -10,10 +10,15 @@ import (
 )
 
 func AddAdminController(c echo.Context) error {
-	_, err := middleware.ExtractTokenAdminId(c, "Super Admin")
+	role, _, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Only Super Admin Can Access This Feature")
 	}
+
+	if role != "super admin" {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Super Admin Can Access This Feature")
+	}
+
 	req := payload.AddAdminRequest{}
 	c.Bind(&req)
 

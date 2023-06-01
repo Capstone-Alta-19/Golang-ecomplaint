@@ -20,12 +20,14 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 
 	// user collection
 	user := e.Group("/user", middleware.JWT([]byte(constant.SECRET_JWT)))
-	user.GET("complaint/id", controller.GetUsersController)
+	user.GET("complaint/id", controller.GetComplaintController)
 	user.POST("/complaint", controller.CreateComplaintController)
+	user.GET("/news", controller.GetNewsController)
 
 	// admin collection
 	admin := e.Group("/admin", middleware.JWT([]byte(constant.SECRET_JWT)))
-	admin.GET("/users", controller.GetUsersController)
-	admin.POST("", controller.AddAdminController)
-
+	admin.POST("/add", controller.AddAdminController)
+	admin.POST("/news", controller.CreateNewsController)
+	admin.DELETE("/news", controller.DeleteNewsController)
+	admin.PUT("/news", controller.UpdateNewsController)
 }
