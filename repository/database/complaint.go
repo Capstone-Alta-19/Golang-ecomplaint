@@ -12,3 +12,13 @@ func CreateComplaint(complaint *model.Complaint) error {
 	}
 	return nil
 }
+
+func GetComplaintsByUserID(userID uint) ([]*model.Complaint, error) {
+	complaints := []*model.Complaint{}
+	err := config.DB.Where("user_id = ?", userID).Find(&complaints).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return complaints, nil
+}
