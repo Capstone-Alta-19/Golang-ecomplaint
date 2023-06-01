@@ -24,6 +24,7 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 
 func GetComplaints(userID uint) ([]*model.Complaint, error) {
 	complaints, err := database.GetComplaintsByUserID(userID)
+
 	if err != nil {
 		return nil, err
 	}
