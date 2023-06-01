@@ -1,7 +1,7 @@
 package config
 
 import (
-	"Golang-ecomplaint/model"
+	"capstone/model"
 	"fmt"
 	"os"
 
