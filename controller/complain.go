@@ -8,16 +8,24 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 func CreateComplaintController(c echo.Context) error {
-	id, _ := middleware.ExtractTokenUserId(c)
+	id, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	req := &payload.CreateComplaintRequest{}
-	c.Bind(&req)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
-	_, err := usecase.CreateComplaint(id, req)
+	_, err = usecase.CreateComplaint(id, req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "Failed To Create Complaint",
