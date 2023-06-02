@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"capstone/constant"
 	"capstone/middleware"
 	"capstone/model/payload"
 	"capstone/usecase"
@@ -15,15 +16,17 @@ func AddAdminController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Only Super Admin Can Access This Feature")
 	}
 
-	if role != "super admin" {
+	if role != constant.SuperAdmin {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Only Super Admin Can Access This Feature")
 	}
 
 	req := payload.AddAdminRequest{}
-	c.Bind(&req)
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Request")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	_, err = usecase.CreateAdmin(req)
