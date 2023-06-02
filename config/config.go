@@ -54,6 +54,7 @@ func InitialMigration() {
 		&model.User{},
 		&model.Admin{},
 		&model.Complaint{},
+		&model.News{},
 	)
 }
 

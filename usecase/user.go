@@ -82,15 +82,6 @@ func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, er
 	return &result, nil
 }
 
-func GetListUsers() (users []model.User, err error) {
-	users, err = database.GetUsers()
-	if err != nil {
-		fmt.Println("GetListUsers: Error getting users from the database")
-		return
-	}
-	return
-}
-
 func UpdateUser(user *model.User) (err error) {
 	err = database.UpdateUser(user)
 	if err != nil {

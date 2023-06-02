@@ -30,14 +30,14 @@ func ExtractTokenUserId(e echo.Context) (uint, error) {
 	return 0, echo.NewHTTPError(http.StatusUnauthorized, "Not Authorized")
 }
 
-func ExtractTokenAdminId(e echo.Context, role string) (uint, error) {
+func ExtractTokenAdminId(e echo.Context) (string, uint, error) {
 	user := e.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	if user.Valid {
 		userId := uint(claims["userId"].(float64))
-		if claims["role"] == role {
-			return userId, nil
-		}
+		role := claims["role"].(string)
+		return role, userId, nil
+
 	}
-	return 0, echo.NewHTTPError(http.StatusUnauthorized, "Not Authorized")
+	return "", 0, echo.NewHTTPError(http.StatusUnauthorized, "Not Authorized")
 }

@@ -14,7 +14,7 @@ import (
 
 func CreateAdmin(req payload.AddAdminRequest) (*model.Admin, error) {
 	_, err := database.GetAdminByUsername(req.Username)
-	if err != nil {
+	if err == nil {
 		return nil, errors.New("username already used")
 	}
 
