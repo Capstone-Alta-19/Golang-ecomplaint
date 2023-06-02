@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"capstone/constant"
 	"capstone/middleware"
 	"capstone/model/payload"
 	"capstone/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -51,4 +53,24 @@ func GetComplaintController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, response)
 
+}
+
+func GetComplaintByIDController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+	complaint, err := usecase.GetComplaintByID(uint(id))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":   "Success",
+		"complaint": complaint,
+	})
 }
