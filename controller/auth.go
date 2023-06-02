@@ -6,7 +6,7 @@ import (
 	"capstone/model/payload"
 	"capstone/usecase"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 func LoginUserController(c echo.Context) error {
