@@ -14,7 +14,7 @@ type CreateUserResponse struct {
 
 type LoginUserRequest struct {
 	UsernameOrEmail string `json:"username_or_email" validate:"required"`
-	Password        string `json:"password" validate:"required,min=5"`
+	Password        string `json:"password" validate:"required,min=6"`
 }
 
 type LoginUserResponse struct {
