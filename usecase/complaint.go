@@ -11,7 +11,7 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 	resp := &model.Complaint{
 		UserID:      UserID,
 		Description: req.Description,
-		Type:        "Complaint",
+		Type:        req.Type,
 		CategoryID:  req.CategoryID,
 		IsPublic:    req.IsPublic,
 	}
@@ -30,4 +30,12 @@ func GetComplaints(userID uint) ([]*model.Complaint, error) {
 	}
 
 	return complaints, nil
+}
+
+func GetComplaintByID(id uint) (*model.Complaint, error) {
+	complaint, err := database.GetComplaintByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return complaint, nil
 }

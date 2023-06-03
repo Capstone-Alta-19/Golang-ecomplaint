@@ -5,9 +5,9 @@ import (
 	"capstone/controller"
 	"capstone/utils"
 
-	"github.com/go-playground/validator"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"gorm.io/gorm"
 )
 
@@ -38,4 +38,6 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.GET("/news/:id", controller.GetNewsController)
 	admin.DELETE("/news", controller.DeleteNewsController)
 	admin.PUT("/news", controller.UpdateNewsController)
+
+	admin.GET("/complaint/:id", controller.GetComplaintByIDController)
 }
