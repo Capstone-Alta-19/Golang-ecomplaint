@@ -30,4 +30,10 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.POST("/news", controller.CreateNewsController)
 	admin.DELETE("/news", controller.DeleteNewsController)
 	admin.PUT("/news", controller.UpdateNewsController)
+
+	// complaint
+	e.GET("/complaint/:id", controller.GetComplaintController)
+
+	// comment
+	e.GET("/comment", controller.GetCommentController)
 }
