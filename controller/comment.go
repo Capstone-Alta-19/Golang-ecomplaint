@@ -36,7 +36,7 @@ func GetCommentController(c echo.Context) error {
 		})
 	}
 
-	comments, err := usecase.GetComment(id)
+	comments, err := usecase.GetComments(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
 			"message": "Failed to get comments",

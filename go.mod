@@ -20,6 +20,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
+	github.com/labstack/echo/v4 v4.10.2 // indirect
 )
 
 require (

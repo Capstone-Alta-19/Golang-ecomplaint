@@ -39,13 +39,5 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.DELETE("/news", controller.DeleteNewsController)
 	admin.PUT("/news", controller.UpdateNewsController)
 
-<<<<<<< HEAD
-	// complaint
-	e.GET("/complaint/:id", controller.GetComplaintController)
-
-	// comment
-	e.GET("/comment", controller.GetCommentController)
-=======
 	admin.GET("/complaint/:id", controller.GetComplaintByIDController)
->>>>>>> fd56739c10ebed5e76dc4fa228de83ae4e4be753
 }

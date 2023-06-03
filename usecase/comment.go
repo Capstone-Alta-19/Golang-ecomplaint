@@ -14,12 +14,12 @@ func CreateComment(UserID uint, req *payload.CreateCommentRequest) (*model.Comme
 	}
 	err := database.CreateComment(resp)
 	if err != nil {
-		return nil, err
+		return nil, err 
 	}
 	return resp, nil
 }
 
-func GetComment(userID uint) ([]*model.Comment, error) {
+func GetComments(userID uint) ([]*model.Comment, error) {
 	comments, err := database.GetCommentsByUserID(userID)
 
 	if err != nil {
