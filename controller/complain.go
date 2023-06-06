@@ -82,3 +82,19 @@ func GetComplaintByIDController(c echo.Context) error {
 		"complaint": complaint,
 	})
 }
+
+func GetFeedbackController(c echo.Context) error {
+	complaintID := c.Param("complaintID")
+
+	feedback, err := usecase.GetFeedback(complaintID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to get feedback").SetInternal(err)
+	}
+
+	response := map[string]interface{}{
+		"message":  "Success",
+		"feedback": feedback,
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
