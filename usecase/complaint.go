@@ -39,3 +39,12 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 	}
 	return complaint, nil
 }
+
+func GetFeedback(complaintID string) ([]*model.Feedback, error) {
+	feedbacks, err := database.GetFeedbacksByComplaintID(complaintID)
+	if err != nil {
+		return nil, err
+	}
+
+	return feedbacks, nil
+}

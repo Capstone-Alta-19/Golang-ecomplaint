@@ -31,3 +31,13 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 	}
 	return &complaint, nil
 }
+
+func GetFeedbacksByComplaintID(complaintID string) ([]*model.Feedback, error) {
+	feedbacks := []*model.Feedback{}
+	err := config.DB.Where("complaint_id = ?", complaintID).Find(&feedbacks).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return feedbacks, nil
+}
