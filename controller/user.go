@@ -2,28 +2,14 @@ package controller
 
 import (
 	"capstone/middleware"
+	"capstone/model"
 	"capstone/model/payload"
 	"capstone/usecase"
 	"net/http"
+	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
-
-func GetUsersController(c echo.Context) error {
-	_, err := middleware.ExtractTokenAdminId(c, "")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	users, err := usecase.GetListUsers()
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success",
-		"users":  users,
-	})
-}
 
 // create user
 func RegisterUserController(c echo.Context) error {
@@ -49,5 +35,29 @@ func RegisterUserController(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success create new user",
 		"user":    user,
+	})
+}
+
+func UpdateUserController(c echo.Context) error {
+	_, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only User Can Access This Feature")
+	}
+
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+	user := model.User{}
+	c.Bind(&user)
+	user.ID = uint(id)
+
+	if err := usecase.UpdateUser(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"messages":         "error update user",
+			"errorDescription": err,
+			"errorMessage":     "Sorry, the user cannot be changed",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success update user",
 	})
 }

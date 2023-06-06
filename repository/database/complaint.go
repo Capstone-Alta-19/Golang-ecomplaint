@@ -22,3 +22,12 @@ func GetComplaintsByUserID(userID uint) ([]*model.Complaint, error) {
 
 	return complaints, nil
 }
+
+func GetComplaintByID(id uint) (*model.Complaint, error) {
+	var complaint model.Complaint
+	err := config.DB.First(&complaint, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &complaint, nil
+}
