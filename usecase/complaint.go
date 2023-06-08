@@ -39,3 +39,30 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 	}
 	return complaint, nil
 }
+
+func GetFeedback(complaintID string) ([]*model.Feedback, error) {
+	feedbacks, err := database.GetFeedbacksByComplaintID(complaintID)
+	if err != nil {
+		return nil, err
+	}
+
+	return feedbacks, nil
+}
+
+func GetComplaintsByCategoryId(categoryID uint, sortParam string) ([]*model.Complaint, error) {
+	complaints, err := database.GetComplaintsByCategoryAndSort(categoryID, sortParam)
+	if err != nil {
+		return nil, err
+	}
+
+	return complaints, nil
+}
+
+func GetLikes(sortBy string, query string) ([]*model.Like, error) {
+	likes, err := database.GetLikes(sortBy, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes, nil
+}
