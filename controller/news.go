@@ -75,7 +75,7 @@ func UpdateNewsController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
 	}
 
-	if role != "admin" {
+	if role != constant.Admin {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
 	}
 
