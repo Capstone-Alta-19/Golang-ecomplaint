@@ -98,3 +98,40 @@ func GetFeedbackController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, response)
 }
+
+func GetComplaintByCategoryIdController(c echo.Context) error {
+	_, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	queryParam := c.QueryParam("sort")
+	complaints, err := usecase.GetComplaintsByCategoryId(uint(id), queryParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "Success",
+		"complaints": complaints,
+	})
+
+}
+
+func GetLikeController(c echo.Context) error {
+	sortBy := c.QueryParam("sort")
+	queryParam := c.QueryParam("q")
+
+	likes, err := usecase.GetLikes(sortBy, queryParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get likes").SetInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success",
+		"likes":   likes,
+	})
+}
