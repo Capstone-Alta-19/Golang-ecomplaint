@@ -90,3 +90,31 @@ func UpdateUser(user *model.User) (err error) {
 	}
 	return
 }
+
+func ChangePasswordUser(UserID uint, payload *payload.ChangePasswordRequest) (err error) {
+	user := model.User{}
+	user.ID = UserID
+	err = database.GetUserByID(&user)
+	if err != nil {
+		fmt.Println("GetUserByID: Error Get user, err:", err)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.OldPassword))
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return errors.New("wrong password")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(payload.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.Password = string(passwordHash)
+	err = database.UpdateUser(&user)
+	if err != nil {
+		fmt.Println("ChangePassword: Error Change Password, err:", err)
+		return
+	}
+	return
+}

@@ -61,3 +61,32 @@ func UpdateUserController(c echo.Context) error {
 		"message": "success update user",
 	})
 }
+
+func ChangePasswordController(c echo.Context) error {
+	userId, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only User Can Access This Feature")
+	}
+
+	payload := payload.ChangePasswordRequest{}
+	c.Bind(&payload)
+	// validasi request body
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"messages":         "Invalid Request Payload",
+			"errorDescription": err.Error(),
+		})
+	}
+
+	if err := usecase.ChangePasswordUser(userId, &payload); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"messages":         "error update password",
+			"errorDescription": err,
+			"errorMessage":     "Sorry, the password cannot be changed",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success update password",
+	})
+}
