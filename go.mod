@@ -9,13 +9,12 @@ require (
 )
 
 require (
+	github.com/cloudinary/cloudinary-go v1.7.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	golang.org/x/crypto v0.9.0
 )
 
 require (
-	github.com/cloudinary/cloudinary-go v1.7.0 // indirect
-	github.com/cloudinary/cloudinary-go/v2 v2.2.0 // indirect
 	github.com/creasty/defaults v1.5.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/google/uuid v1.2.0 // indirect
