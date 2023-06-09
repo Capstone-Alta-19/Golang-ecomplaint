@@ -15,7 +15,7 @@ func CreateComplaint(complaint *model.Complaint) error {
 
 func GetComplaintsByCategoryID(categoryID uint) ([]*model.Complaint, error) {
 	complaints := []*model.Complaint{}
-	err := config.DB.Where("category_id = ?", categoryID).Find(&complaints).Error
+	err := config.DB.Preload("User").Preload("Feedback").Where("category_id = ?", categoryID).Find(&complaints).Error
 	if err != nil {
 		return nil, err
 	}

@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type Complaint struct {
 	gorm.Model
 	UserID      uint      `json:"user_id"`
-	User        User      `json:"-"`
+	User        User      `json:"user"`
 	CategoryID  uint      `json:"category_id"`
 	Category    Category  `json:"-"`
 	Type        string    `json:"type"`
