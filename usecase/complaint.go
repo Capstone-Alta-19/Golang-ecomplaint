@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"capstone/constant"
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
@@ -12,8 +13,11 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		UserID:      UserID,
 		Description: req.Description,
 		Type:        req.Type,
+		PhotoURL:    req.PhotoURL,
+		VideoURL:    req.VideoURL,
 		CategoryID:  req.CategoryID,
 		IsPublic:    req.IsPublic,
+		Status:      constant.StatusPending,
 	}
 	err := database.CreateComplaint(resp)
 	if err != nil {
@@ -38,31 +42,4 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 		return nil, err
 	}
 	return complaint, nil
-}
-
-func GetFeedback(complaintID string) ([]*model.Feedback, error) {
-	feedbacks, err := database.GetFeedbacksByComplaintID(complaintID)
-	if err != nil {
-		return nil, err
-	}
-
-	return feedbacks, nil
-}
-
-func GetComplaintsByCategoryId(categoryID uint, sortParam string) ([]*model.Complaint, error) {
-	complaints, err := database.GetComplaintsByCategoryAndSort(categoryID, sortParam)
-	if err != nil {
-		return nil, err
-	}
-
-	return complaints, nil
-}
-
-func GetLikes(sortBy string, query string) ([]*model.Like, error) {
-	likes, err := database.GetLikes(sortBy, query)
-	if err != nil {
-		return nil, err
-	}
-
-	return likes, nil
 }
