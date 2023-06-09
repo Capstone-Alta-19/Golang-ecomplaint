@@ -41,3 +41,11 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 	}
 	return &complaint, nil
 }
+
+func DeleteComplaint(complaint *model.Complaint) error {
+	err := config.DB.Delete(complaint).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

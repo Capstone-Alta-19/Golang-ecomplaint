@@ -77,3 +77,23 @@ func AdminGetComplaintByIDController(c echo.Context) error {
 		"complaint": complaint,
 	})
 }
+
+func DeleteComplaintByIDController(c echo.Context) error {
+	userID, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	complaintID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = usecase.DeleteComplaintByID(userID, uint(complaintID))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success",
+	})
+}

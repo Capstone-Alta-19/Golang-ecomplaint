@@ -5,6 +5,7 @@ import (
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"errors"
 	"sort"
 )
 
@@ -71,4 +72,20 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 		return nil, err
 	}
 	return complaint, nil
+}
+
+func DeleteComplaintByID(userID, complaintID uint) error {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return err
+	}
+	if complaint.UserID != userID {
+		return errors.New("you are not the owner of this complaint")
+	}
+
+	err = database.DeleteComplaint(complaint)
+	if err != nil {
+		return err
+	}
+	return nil
 }
