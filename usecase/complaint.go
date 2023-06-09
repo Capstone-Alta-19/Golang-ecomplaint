@@ -1,9 +1,12 @@
 package usecase
 
 import (
+	"capstone/constant"
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"errors"
+	"sort"
 )
 
 func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.Complaint, error) {
@@ -12,8 +15,11 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		UserID:      UserID,
 		Description: req.Description,
 		Type:        req.Type,
+		PhotoURL:    req.PhotoURL,
+		VideoURL:    req.VideoURL,
 		CategoryID:  req.CategoryID,
 		IsPublic:    req.IsPublic,
+		Status:      constant.StatusPending,
 	}
 	err := database.CreateComplaint(resp)
 	if err != nil {
@@ -22,14 +28,42 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 	return resp, nil
 }
 
-func GetComplaints(userID uint) ([]*model.Complaint, error) {
-	complaints, err := database.GetComplaintsByUserID(userID)
-
+func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Complaint, error) {
+	complaints, err := database.GetComplaintsByCategoryID(categoryID)
 	if err != nil {
 		return nil, err
 	}
+	publicComplaint := []*model.Complaint{}
+	for _, v := range complaints {
+		if v.IsPublic == true {
+			publicComplaint = append(publicComplaint, v)
+		}
+	}
 
-	return complaints, nil
+	for _, complaint := range publicComplaint {
+		likesCount, err := database.GetLikesCountByComplaintID(complaint.ID)
+		if err != nil {
+			return nil, err
+		}
+		complaint.LikesCount = likesCount
+	}
+
+	switch sortOrder {
+	case constant.Ascending:
+		sort.Slice(publicComplaint, func(i, j int) bool {
+			return publicComplaint[i].CreatedAt.Before(publicComplaint[j].CreatedAt)
+		})
+	case constant.Descending:
+		sort.Slice(publicComplaint, func(i, j int) bool {
+			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
+		})
+	default:
+		sort.Slice(publicComplaint, func(i, j int) bool {
+			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
+		})
+	}
+
+	return publicComplaint, nil
 }
 
 func GetComplaintByID(id uint) (*model.Complaint, error) {
@@ -40,29 +74,18 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 	return complaint, nil
 }
 
-func GetFeedback(complaintID string) ([]*model.Feedback, error) {
-	feedbacks, err := database.GetFeedbacksByComplaintID(complaintID)
+func DeleteComplaintByID(userID, complaintID uint) error {
+	complaint, err := database.GetComplaintByID(complaintID)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	if complaint.UserID != userID {
+		return errors.New("you are not the owner of this complaint")
 	}
 
-	return feedbacks, nil
-}
-
-func GetComplaintsByCategoryId(categoryID uint, sortParam string) ([]*model.Complaint, error) {
-	complaints, err := database.GetComplaintsByCategoryAndSort(categoryID, sortParam)
+	err = database.DeleteComplaint(complaint)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return complaints, nil
-}
-
-func GetLikes(sortBy string, query string) ([]*model.Like, error) {
-	likes, err := database.GetLikes(sortBy, query)
-	if err != nil {
-		return nil, err
-	}
-
-	return likes, nil
+	return nil
 }
