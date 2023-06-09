@@ -6,5 +6,5 @@ type CreateComplaintRequest struct {
 	PhotoURL    string `json:"photo_url"`
 	VideoURL    string `json:"video_url"`
 	CategoryID  uint   `json:"category_id" validate:"required"`
-	IsPublic    bool   `json:"is_public" validate:"required"`
+	IsPublic    bool   `json:"is_public" validate:"omitempty"`
 }

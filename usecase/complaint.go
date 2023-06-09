@@ -34,24 +34,12 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Comp
 	}
 	publicComplaint := []*model.Complaint{}
 	for _, v := range complaints {
-		if v.IsPublic {
+		if v.IsPublic == true {
 			publicComplaint = append(publicComplaint, v)
 		}
 	}
 
 	for _, complaint := range publicComplaint {
-		user, err := database.GetUserByID(complaint.UserID)
-		if err != nil {
-			return nil, err
-		}
-		complaint.User = *user
-
-		feedback, err := database.GetFeedbackByComplaintID(complaint.ID)
-		if err != nil {
-			return nil, err
-		}
-		complaint.Feedback = *feedback
-
 		likesCount, err := database.GetLikesCountByComplaintID(complaint.ID)
 		if err != nil {
 			return nil, err
@@ -75,16 +63,6 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Comp
 	}
 
 	return publicComplaint, nil
-}
-
-func GetComplaints(userID uint) ([]*model.Complaint, error) {
-	complaints, err := database.GetComplaintsByUserID(userID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return complaints, nil
 }
 
 func GetComplaintByID(id uint) (*model.Complaint, error) {
