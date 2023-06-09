@@ -18,11 +18,11 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	e.POST("/login/user", controller.LoginUserController)
 	e.POST("/login/admin", controller.LoginAdminController)
 	e.GET("/news", controller.GetNewsController)
+	e.POST("/upload", controller.UploadFileController)
 
 	// user collection
 	user := e.Group("/user", middleware.JWT([]byte(constant.SECRET_JWT)))
-	user.GET("complaint/:id", controller.GetComplaintController)
-	user.GET("feedback/:complaintID", controller.GetFeedbackController)
+
 	user.POST("/complaint", controller.CreateComplaintController)
 	user.GET("/news/:id", controller.GetNewsController)
 	user.PUT("/:id", controller.UpdateUserController)
@@ -36,5 +36,5 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.DELETE("/news", controller.DeleteNewsController)
 	admin.PUT("/news", controller.UpdateNewsController)
 
-	admin.GET("/complaint/:id", controller.GetComplaintByIDController)
+	admin.GET("/complaint/:id", controller.AdminGetComplaintByIDController)
 }
