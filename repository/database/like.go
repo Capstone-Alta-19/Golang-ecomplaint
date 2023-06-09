@@ -31,3 +31,13 @@ func AddLikeByComplaintID(like *model.Like) error {
 	}
 	return nil
 }
+
+func UnLikeByComplaintIdAndUserId(userID, complaintID uint) error {
+	var like model.Like
+	err := config.DB.Unscoped().Where("user_id = ? AND complaint_id = ?", userID, complaintID).Delete(&like).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -31,3 +31,26 @@ func LikeByComplaintID(userID uint, complaintID uint64) error {
 
 	return nil
 }
+
+func UnLikeByComplaintID(userID uint, complaintID uint64) error {
+	complaint, err := database.GetComplaintByID(uint(complaintID))
+	if err != nil {
+		return err
+	}
+
+	liked, err := database.GetLikeByComplaintIdAndUserId(userID, complaint.ID)
+	if err != nil {
+		return err
+	}
+
+	if liked == nil {
+		return errors.New("You have not liked this complaint")
+	}
+
+	err = database.UnLikeByComplaintIdAndUserId(userID, complaint.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
