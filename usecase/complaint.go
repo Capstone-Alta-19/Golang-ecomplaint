@@ -5,6 +5,7 @@ import (
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"sort"
 )
 
 func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.Complaint, error) {
@@ -24,6 +25,56 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		return nil, err
 	}
 	return resp, nil
+}
+
+func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Complaint, error) {
+	complaints, err := database.GetComplaintsByCategoryID(categoryID)
+	if err != nil {
+		return nil, err
+	}
+	publicComplaint := []*model.Complaint{}
+	for _, v := range complaints {
+		if v.IsPublic {
+			publicComplaint = append(publicComplaint, v)
+		}
+	}
+
+	for _, complaint := range publicComplaint {
+		user, err := database.GetUserByID(complaint.UserID)
+		if err != nil {
+			return nil, err
+		}
+		complaint.User = *user
+
+		feedback, err := database.GetFeedbackByComplaintID(complaint.ID)
+		if err != nil {
+			return nil, err
+		}
+		complaint.Feedback = *feedback
+
+		likesCount, err := database.GetLikesCountByComplaintID(complaint.ID)
+		if err != nil {
+			return nil, err
+		}
+		complaint.LikesCount = likesCount
+	}
+
+	switch sortOrder {
+	case constant.Ascending:
+		sort.Slice(publicComplaint, func(i, j int) bool {
+			return publicComplaint[i].CreatedAt.Before(publicComplaint[j].CreatedAt)
+		})
+	case constant.Descending:
+		sort.Slice(publicComplaint, func(i, j int) bool {
+			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
+		})
+	default:
+		sort.Slice(publicComplaint, func(i, j int) bool {
+			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
+		})
+	}
+
+	return publicComplaint, nil
 }
 
 func GetComplaints(userID uint) ([]*model.Complaint, error) {
