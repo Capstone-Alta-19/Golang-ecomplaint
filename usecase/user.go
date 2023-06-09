@@ -92,9 +92,7 @@ func UpdateUser(user *model.User) (err error) {
 }
 
 func ChangePasswordUser(UserID uint, payload *payload.ChangePasswordRequest) (err error) {
-	user := model.User{}
-	user.ID = UserID
-	err = database.GetUserByID(&user)
+	user, err := database.GetUserByID(UserID)
 	if err != nil {
 		fmt.Println("GetUserByID: Error Get user, err:", err)
 		return
@@ -111,7 +109,7 @@ func ChangePasswordUser(UserID uint, payload *payload.ChangePasswordRequest) (er
 	}
 
 	user.Password = string(passwordHash)
-	err = database.UpdateUser(&user)
+	err = database.UpdateUser(user)
 	if err != nil {
 		fmt.Println("ChangePassword: Error Change Password, err:", err)
 		return
