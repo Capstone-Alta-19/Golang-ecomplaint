@@ -10,18 +10,21 @@ import (
 )
 
 func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.Complaint, error) {
-
+	category, err := database.GetCategoryByID(req.CategoryID)
+	if err != nil {
+		return nil, errors.New("category not found")
+	}
 	resp := &model.Complaint{
 		UserID:      UserID,
 		Description: req.Description,
 		Type:        req.Type,
 		PhotoURL:    req.PhotoURL,
 		VideoURL:    req.VideoURL,
-		CategoryID:  req.CategoryID,
+		CategoryID:  category.ID,
 		IsPublic:    req.IsPublic,
 		Status:      constant.StatusPending,
 	}
-	err := database.CreateComplaint(resp)
+	err = database.CreateComplaint(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +67,41 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Comp
 	}
 
 	return publicComplaint, nil
+}
+
+func GetUserComplaintsByStatus(userID uint, status string) ([]*payload.GetComplaintByStatusResponse, error) {
+	complaints, err := database.GetComplaintsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(complaints, func(i, j int) bool {
+		return complaints[i].CreatedAt.After(complaints[j].CreatedAt)
+	})
+
+	if status == constant.StatusAll {
+		resp := []*payload.GetComplaintByStatusResponse{}
+		for _, v := range complaints {
+			resp = append(resp, &payload.GetComplaintByStatusResponse{
+				ID:          v.ID,
+				Description: v.Description,
+				Status:      v.Status,
+			})
+		}
+		return resp, nil
+	}
+
+	userComplaints := []*payload.GetComplaintByStatusResponse{}
+	for _, v := range complaints {
+		if v.Status == status {
+			userComplaints = append(userComplaints, &payload.GetComplaintByStatusResponse{
+				ID:          v.ID,
+				Description: v.Description,
+				Status:      v.Status,
+			})
+		}
+	}
+
+	return userComplaints, nil
 }
 
 func GetComplaintByID(id uint) (*model.Complaint, error) {

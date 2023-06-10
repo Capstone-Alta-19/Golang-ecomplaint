@@ -58,6 +58,23 @@ func GetComplaintsByCategoryIDController(c echo.Context) error {
 	})
 }
 
+func GetUserComplaintsByStatusController(c echo.Context) error {
+	userID, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	status := c.QueryParam("status")
+	complaints, err := usecase.GetUserComplaintsByStatus(userID, status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "Success",
+		"complaints": complaints,
+	})
+}
+
 func AdminGetComplaintByIDController(c echo.Context) error {
 	role, _, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
