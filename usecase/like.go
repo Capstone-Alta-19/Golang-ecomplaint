@@ -16,7 +16,7 @@ func LikeByComplaintID(userID uint, complaintID uint64) error {
 		return err
 	}
 	if liked != nil {
-		return errors.New("You have liked this complaint")
+		return errors.New("you have liked this complaint")
 	}
 
 	like := model.Like{
@@ -44,7 +44,7 @@ func UnLikeByComplaintID(userID uint, complaintID uint64) error {
 	}
 
 	if liked == nil {
-		return errors.New("You have not liked this complaint")
+		return errors.New("you have not liked this complaint")
 	}
 
 	err = database.UnLikeByComplaintIdAndUserId(userID, complaint.ID)
