@@ -79,13 +79,11 @@ func GetUserComplaintsByStatus(userID uint, status string) ([]*payload.GetCompla
 
 	resp := []*payload.GetComplaintByStatusResponse{}
 	for _, v := range complaints {
-		if v.Status == status {
-			resp = append(resp, &payload.GetComplaintByStatusResponse{
-				ID:          v.ID,
-				Description: v.Description,
-				Status:      v.Status,
-			})
-		}
+		resp = append(resp, &payload.GetComplaintByStatusResponse{
+			ID:          v.ID,
+			Description: v.Description,
+			Status:      v.Status,
+		})
 	}
 
 	return resp, nil
