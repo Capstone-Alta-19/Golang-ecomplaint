@@ -48,4 +48,5 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.GET("/complaint", controller.GetAllComplaintsController)
 	admin.POST("/complaint/:id", controller.CreateFeedbackByComplaintIDController)
 	admin.GET("/complaint/:id", controller.AdminGetComplaintByIDController)
+	admin.PUT("/complaint/:id", controller.UpdateComplaintController)
 }

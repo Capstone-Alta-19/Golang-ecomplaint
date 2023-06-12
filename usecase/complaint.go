@@ -189,3 +189,19 @@ func CreateFeedbackByComplaintID(req *payload.CreateFeedbackRequest, complaintID
 	}
 	return resp, nil
 }
+
+func UpdateComplaintByID(req *payload.UpdateComplaintRequest, complaintID uint) (*model.Complaint, error) {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return nil, errors.New("complaint not found")
+	}
+
+	complaint.Status = req.Status
+	complaint.Type = req.Type
+
+	err = database.UpdateComplaint(complaint)
+	if err != nil {
+		return nil, err
+	}
+	return complaint, nil
+}

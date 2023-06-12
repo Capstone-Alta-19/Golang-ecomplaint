@@ -60,3 +60,8 @@ type GetComplaintByIDResponse struct {
 	IsPublic    bool      `json:"is_public"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+type UpdateComplaintRequest struct {
+	Status string `json:"status" validate:"required,oneof=Pending Proccess Resolved"`
+	Type   string `json:"type" validate:"required,oneof=Complaint Aspiration"`
+}
