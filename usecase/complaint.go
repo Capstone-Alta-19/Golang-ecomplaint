@@ -102,7 +102,7 @@ func GetComplaintByID(id uint) (*model.Complaint, error) {
 func DeleteComplaintByID(userID, complaintID uint) error {
 	complaint, err := database.GetComplaintByID(complaintID)
 	if err != nil {
-		return err
+		return errors.New("complaint not found")
 	}
 	if complaint.UserID != userID {
 		return errors.New("you are not the owner of this complaint")
