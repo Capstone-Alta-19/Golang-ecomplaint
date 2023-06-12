@@ -1,10 +1,12 @@
 package usecase
 
 import (
+	"capstone/constant"
 	"capstone/middleware"
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"capstone/utils"
 	"errors"
 	"fmt"
 
@@ -115,4 +117,37 @@ func ChangePasswordUser(UserID uint, payload *payload.ChangePasswordRequest) (er
 		return
 	}
 	return
+}
+
+func GetUserProfile(userID uint) (*payload.GetUserProfileResponse, error) {
+	user, err := database.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	complaints, err := database.GetComplaintsByUserID(user.ID, constant.StatusAll)
+	if err != nil {
+		return nil, err
+	}
+	var laporan, pending, proccess, resolved uint
+	for _, complaint := range complaints {
+		switch complaint.Status {
+		case constant.StatusPending:
+			pending++
+		case constant.StatusProccess:
+			proccess++
+		case constant.StatusResolved:
+			resolved++
+		}
+		laporan++
+	}
+	resp := payload.GetUserProfileResponse{
+		ID:           user.ID,
+		PhotoProfile: utils.ConvertToNullString(user.PhotoProfile),
+		FullName:     user.FullName,
+		Laporan:      laporan,
+		Pending:      pending,
+		Proccess:     proccess,
+		Resolved:     resolved,
+	}
+	return &resp, nil
 }
