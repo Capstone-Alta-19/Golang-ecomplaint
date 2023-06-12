@@ -48,3 +48,15 @@ type GetAllComplaintsResponse struct {
 	IsPublic    bool      `json:"is_public"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+type GetComplaintByIDResponse struct {
+	ID          uint      `json:"id"`
+	FullName    string    `json:"full_name"`
+	Type        string    `json:"type"`
+	Category    string    `json:"category"`
+	Description string    `json:"description"`
+	PhotoURL    *string   `json:"photo_url"`
+	VideoURL    *string   `json:"video_url"`
+	IsPublic    bool      `json:"is_public"`
+	CreatedAt   time.Time `json:"created_at"`
+}

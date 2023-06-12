@@ -91,12 +91,23 @@ func GetUserComplaintsByStatus(userID uint, status string) ([]*payload.GetCompla
 	return resp, nil
 }
 
-func GetComplaintByID(id uint) (*model.Complaint, error) {
+func GetComplaintByID(id uint) (*payload.GetComplaintByIDResponse, error) {
 	complaint, err := database.GetComplaintByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("complaint not found")
 	}
-	return complaint, nil
+	resp := payload.GetComplaintByIDResponse{
+		ID:          complaint.ID,
+		FullName:    complaint.User.FullName,
+		Type:        complaint.Type,
+		Category:    complaint.Category.Name,
+		Description: complaint.Description,
+		PhotoURL:    utils.ConvertToNullString(complaint.PhotoURL),
+		VideoURL:    utils.ConvertToNullString(complaint.VideoURL),
+		IsPublic:    complaint.IsPublic,
+		CreatedAt:   complaint.CreatedAt,
+	}
+	return &resp, nil
 }
 
 func DeleteComplaintByID(userID, complaintID uint) error {
@@ -152,6 +163,29 @@ func GetAllComplaints(sortBy, typeSort, search string, limit, page int) ([]*payl
 			IsPublic:    v.IsPublic,
 			CreatedAt:   v.CreatedAt,
 		})
+	}
+	return resp, nil
+}
+
+func CreateFeedbackByComplaintID(req *payload.CreateFeedbackRequest, complaintID uint) (*model.Feedback, error) {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return nil, errors.New("complaint not found")
+	}
+	resp := &model.Feedback{
+		ComplaintID: complaint.ID,
+		Description: req.Description,
+	}
+
+	err = database.CreateFeedback(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	complaint.Status = constant.StatusResolved
+	err = database.UpdateComplaint(complaint)
+	if err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
