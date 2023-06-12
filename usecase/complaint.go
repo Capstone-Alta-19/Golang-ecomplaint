@@ -63,7 +63,7 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.Ge
 			PhotoURL:     utils.ConvertToNullString(v.PhotoURL),
 			VideoURL:     utils.ConvertToNullString(v.VideoURL),
 			IsPublic:     v.IsPublic,
-			Feedback:     v.Feedback.Description,
+			Feedback:     utils.ConvertToNullString(v.Feedback.Description),
 			LikesCount:   v.LikesCount,
 			CreatedAt:    v.CreatedAt,
 		})

@@ -29,3 +29,13 @@ type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" validate:"required"`
 	NewPassword string `json:"new_password" validate:"required"`
 }
+
+type GetUserProfileResponse struct {
+	ID           uint    `json:"id"`
+	PhotoProfile *string `json:"photo_profile"`
+	FullName     string  `json:"full_name"`
+	Laporan      uint    `json:"laporan"`
+	Pending      uint    `json:"pending"`
+	Proccess     uint    `json:"proccess"`
+	Resolved     uint    `json:"resolved"`
+}
