@@ -27,7 +27,7 @@ type GetComplaintByCategoryIDResponse struct {
 	PhotoURL     *string   `json:"photo_url"`
 	VideoURL     *string   `json:"video_url"`
 	IsPublic     bool      `json:"is_public"`
-	Feedback     string    `json:"feedback"`
+	Feedback     *string   `json:"feedback"`
 	LikesCount   uint      `json:"likes_count"`
 	CreatedAt    time.Time `json:"created_at"`
 }
