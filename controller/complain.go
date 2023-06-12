@@ -194,3 +194,34 @@ func GetAllComplaintsController(c echo.Context) error {
 		"complaints": complaints,
 	})
 }
+
+func CreateFeedbackByComplaintIDController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	complaintID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	req := &payload.CreateFeedbackRequest{}
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	_, err = usecase.CreateFeedbackByComplaintID(req, uint(complaintID))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success",
+	})
+}

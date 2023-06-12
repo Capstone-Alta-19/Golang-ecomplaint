@@ -50,7 +50,7 @@ func GetComplaintsByUserID(userID uint, status string) ([]*model.Complaint, erro
 
 func GetComplaintByID(id uint) (*model.Complaint, error) {
 	var complaint model.Complaint
-	err := config.DB.Where("id = ?", id).First(&complaint).Error
+	err := config.DB.Preload("User").Preload("Category").Where("id = ?", id).First(&complaint).Error
 	if err != nil {
 		return nil, err
 	}
@@ -106,4 +106,12 @@ func GetAllComplaints(sortby, typeSort, search string, limit, offset int) ([]*mo
 		return nil, err
 	}
 	return complaints, nil
+}
+
+func UpdateComplaint(complaint *model.Complaint) error {
+	err := config.DB.Save(complaint).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
