@@ -37,33 +37,45 @@ func CreateComplaintController(c echo.Context) error {
 	})
 }
 
-func GetComplaintController(c echo.Context) error {
-	id, err := middleware.ExtractTokenUserId(c)
+func GetComplaintsByCategoryIDController(c echo.Context) error {
+	_, err := middleware.ExtractTokenUserId(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "Failed to extract user ID from token",
-			"error":   err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	complaints, err := usecase.GetComplaints(id)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "Failed to get complaints",
-			"error":   err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
-	response := map[string]interface{}{
+	queryParam := c.QueryParam("sort")
+	complaints, err := usecase.GetComplaintsByCategoryID(uint(id), queryParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":    "Success",
 		"complaints": complaints,
-	}
-
-	return c.JSON(http.StatusOK, response)
-
+	})
 }
 
-func GetComplaintByIDController(c echo.Context) error {
+func GetUserComplaintsByStatusController(c echo.Context) error {
+	userID, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	status := c.QueryParam("status")
+	complaints, err := usecase.GetUserComplaintsByStatus(userID, status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "Success",
+		"complaints": complaints,
+	})
+}
+
+func AdminGetComplaintByIDController(c echo.Context) error {
 	role, _, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -83,55 +95,22 @@ func GetComplaintByIDController(c echo.Context) error {
 	})
 }
 
-func GetFeedbackController(c echo.Context) error {
-	complaintID := c.Param("complaintID")
-
-	feedback, err := usecase.GetFeedback(complaintID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to get feedback").SetInternal(err)
-	}
-
-	response := map[string]interface{}{
-		"message":  "Success",
-		"feedback": feedback,
-	}
-
-	return c.JSON(http.StatusOK, response)
-}
-
-func GetComplaintByCategoryIdController(c echo.Context) error {
-	_, err := middleware.ExtractTokenUserId(c)
+func DeleteComplaintByIDController(c echo.Context) error {
+	userID, err := middleware.ExtractTokenUserId(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	complaintID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	queryParam := c.QueryParam("sort")
-	complaints, err := usecase.GetComplaintsByCategoryId(uint(id), queryParam)
+
+	err = usecase.DeleteComplaintByID(userID, uint(complaintID))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":    "Success",
-		"complaints": complaints,
-	})
-
-}
-
-func GetLikeController(c echo.Context) error {
-	sortBy := c.QueryParam("sort")
-	queryParam := c.QueryParam("q")
-
-	likes, err := usecase.GetLikes(sortBy, queryParam)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get likes").SetInternal(err)
-	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Success",
-		"likes":   likes,
 	})
 }

@@ -18,19 +18,22 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	e.POST("/login/user", controller.LoginUserController)
 	e.POST("/login/admin", controller.LoginAdminController)
 	e.GET("/news", controller.GetNewsController)
+	e.POST("/upload", controller.UploadFileController)
 
 	// user collection
 	user := e.Group("/user", middleware.JWT([]byte(constant.SECRET_JWT)))
-	user.GET("complaint/:id", controller.GetComplaintController)
-	user.GET("feedback/:complaintID", controller.GetFeedbackController)
 	user.POST("/complaint", controller.CreateComplaintController)
+	user.GET("/complaint", controller.GetUserComplaintsByStatusController)
+	user.GET("/complaint/category/:id", controller.GetComplaintsByCategoryIDController)
+	user.POST("/complaint/:id/comment", controller.CreateCommentByComplaintIDController)
+
+	user.POST("/complaint/:id/like", controller.LikeByComplaintIDController)
+	user.DELETE("/complaint/:id/like", controller.UnlikeByComplaintIDController)
+
+	user.DELETE("/complaint/:id", controller.DeleteComplaintByIDController)
 	user.GET("/news/:id", controller.GetNewsController)
-	user.PUT("/username", controller.UpdateUserController)
-	user.PUT("/password", controller.UpdateUserController)
-	user.PUT("/name", controller.UpdateUserController)
-	user.PUT("/photoprofile", controller.UpdateUserController)
-	user.PUT("/phone", controller.UpdateUserController)
-	user.PUT("/email", controller.UpdateUserController)
+	user.PUT("/:id", controller.UpdateUserController)
+	user.PUT("/password", controller.ChangePasswordController)
 
 	// admin collection
 	admin := e.Group("/admin", middleware.JWT([]byte(constant.SECRET_JWT)))
@@ -40,5 +43,5 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.DELETE("/news", controller.DeleteNewsController)
 	admin.PUT("/news", controller.UpdateNewsController)
 
-	admin.GET("/complaint/:id", controller.GetComplaintByIDController)
+	admin.GET("/complaint/:id", controller.AdminGetComplaintByIDController)
 }

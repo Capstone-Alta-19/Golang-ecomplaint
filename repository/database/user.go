@@ -49,3 +49,11 @@ func LoginUser(user *model.User) error {
 	}
 	return nil
 }
+
+func GetUserByID(id uint) (*model.User, error) {
+	var user model.User
+	if err := config.DB.Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

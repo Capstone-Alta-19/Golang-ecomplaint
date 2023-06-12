@@ -24,3 +24,8 @@ type LoginUserResponse struct {
 type OtpEmailRequest struct {
 	Email string `json:"email"`
 }
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required"`
+}
