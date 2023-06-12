@@ -7,7 +7,6 @@ import (
 	"capstone/repository/database"
 	"capstone/utils"
 	"errors"
-	"sort"
 )
 
 func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.Complaint, error) {
@@ -73,38 +72,23 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.Ge
 }
 
 func GetUserComplaintsByStatus(userID uint, status string) ([]*payload.GetComplaintByStatusResponse, error) {
-	complaints, err := database.GetComplaintsByUserID(userID)
+	complaints, err := database.GetComplaintsByUserID(userID, status)
 	if err != nil {
 		return nil, err
 	}
-	sort.Slice(complaints, func(i, j int) bool {
-		return complaints[i].CreatedAt.After(complaints[j].CreatedAt)
-	})
 
-	if status == constant.StatusAll {
-		resp := []*payload.GetComplaintByStatusResponse{}
-		for _, v := range complaints {
+	resp := []*payload.GetComplaintByStatusResponse{}
+	for _, v := range complaints {
+		if v.Status == status {
 			resp = append(resp, &payload.GetComplaintByStatusResponse{
 				ID:          v.ID,
 				Description: v.Description,
 				Status:      v.Status,
 			})
 		}
-		return resp, nil
 	}
 
-	userComplaints := []*payload.GetComplaintByStatusResponse{}
-	for _, v := range complaints {
-		if v.Status == status {
-			userComplaints = append(userComplaints, &payload.GetComplaintByStatusResponse{
-				ID:          v.ID,
-				Description: v.Description,
-				Status:      v.Status,
-			})
-		}
-	}
-
-	return userComplaints, nil
+	return resp, nil
 }
 
 func GetComplaintByID(id uint) (*model.Complaint, error) {

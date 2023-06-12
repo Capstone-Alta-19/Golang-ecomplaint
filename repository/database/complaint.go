@@ -31,9 +31,16 @@ func GetComplaintsByCategoryID(categoryID uint, sort string) ([]*model.Complaint
 	return complaints, nil
 }
 
-func GetComplaintsByUserID(userID uint) ([]*model.Complaint, error) {
+func GetComplaintsByUserID(userID uint, status string) ([]*model.Complaint, error) {
 	complaints := []*model.Complaint{}
-	err := config.DB.Where("user_id = ?", userID).Find(&complaints).Error
+	DB := config.DB
+	DB = DB.Order("created_at desc")
+	if status == constant.StatusAll {
+		DB = DB.Where("user_id = ?", userID)
+	} else {
+		DB = DB.Where("user_id = ? AND status = ?", userID, status)
+	}
+	err := DB.Find(&complaints).Error
 	if err != nil {
 		return nil, err
 	}

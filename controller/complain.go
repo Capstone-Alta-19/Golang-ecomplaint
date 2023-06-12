@@ -70,6 +70,10 @@ func GetUserComplaintsByStatusController(c echo.Context) error {
 	}
 
 	status := c.QueryParam("status")
+	if status != constant.StatusAll && status != constant.StatusPending && status != constant.StatusProccess && status != constant.StatusResolved {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid status query")
+	}
+
 	complaints, err := usecase.GetUserComplaintsByStatus(userID, status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
