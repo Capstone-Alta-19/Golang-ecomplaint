@@ -114,3 +114,21 @@ func DeleteComplaintByID(userID, complaintID uint) error {
 	}
 	return nil
 }
+
+func GetTotalComplaints() (*payload.GetTotalComplaintsResponse, error) {
+	complaint, err := database.GetTotalComplaints()
+	if err != nil {
+		return nil, err
+	}
+	Aspiration, err := database.GetTotalAspirations()
+	if err != nil {
+		return nil, err
+	}
+	total := complaint + Aspiration
+	resp := &payload.GetTotalComplaintsResponse{
+		Total:      total,
+		Complaint:  complaint,
+		Aspiration: Aspiration,
+	}
+	return resp, nil
+}

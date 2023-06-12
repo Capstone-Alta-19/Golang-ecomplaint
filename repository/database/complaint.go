@@ -64,3 +64,21 @@ func DeleteComplaint(complaint *model.Complaint) error {
 	}
 	return nil
 }
+
+func GetTotalComplaints() (uint, error) {
+	var total int64
+	err := config.DB.Model(&model.Complaint{}).Where("type = ?", constant.Complaint).Count(&total).Error
+	if err != nil {
+		return 0, err
+	}
+	return uint(total), nil
+}
+
+func GetTotalAspirations() (uint, error) {
+	var total int64
+	err := config.DB.Model(&model.Complaint{}).Where("type = ?", constant.Aspiration).Count(&total).Error
+	if err != nil {
+		return 0, err
+	}
+	return uint(total), nil
+}

@@ -31,3 +31,9 @@ type GetComplaintByCategoryIDResponse struct {
 	LikesCount   uint      `json:"likes_count"`
 	CreatedAt    time.Time `json:"created_at"`
 }
+
+type GetTotalComplaintsResponse struct {
+	Total      uint `json:"total"`
+	Complaint  uint `json:"complaint"`
+	Aspiration uint `json:"aspiration"`
+}

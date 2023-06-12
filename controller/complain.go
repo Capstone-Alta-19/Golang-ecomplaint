@@ -123,3 +123,22 @@ func DeleteComplaintByIDController(c echo.Context) error {
 		"message": "Success",
 	})
 }
+
+func GetTotalComplaintsController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	total, err := usecase.GetTotalComplaints()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success",
+		"total":   total,
+	})
+}
