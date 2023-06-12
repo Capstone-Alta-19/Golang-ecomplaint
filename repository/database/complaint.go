@@ -2,6 +2,7 @@ package database
 
 import (
 	"capstone/config"
+	"capstone/constant"
 	"capstone/model"
 )
 
@@ -13,9 +14,16 @@ func CreateComplaint(complaint *model.Complaint) error {
 	return nil
 }
 
-func GetComplaintsByCategoryID(categoryID uint) ([]*model.Complaint, error) {
+func GetComplaintsByCategoryID(categoryID uint, sort string) ([]*model.Complaint, error) {
 	complaints := []*model.Complaint{}
-	err := config.DB.Preload("User").Preload("Feedback").Where("category_id = ?", categoryID).Find(&complaints).Error
+	DB := config.DB
+	if sort == constant.Ascending {
+		DB = DB.Order("created_at asc")
+	} else if sort == constant.Descending {
+		DB = DB.Order("created_at desc")
+	}
+
+	err := DB.Preload("User").Preload("Category").Preload("Feedback").Where("category_id = ?", categoryID).Find(&complaints).Error
 	if err != nil {
 		return nil, err
 	}

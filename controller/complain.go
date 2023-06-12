@@ -47,7 +47,12 @@ func GetComplaintsByCategoryIDController(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
 	queryParam := c.QueryParam("sort")
+	if queryParam != constant.Ascending && queryParam != constant.Descending {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query")
+	}
+
 	complaints, err := usecase.GetComplaintsByCategoryID(uint(id), queryParam)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

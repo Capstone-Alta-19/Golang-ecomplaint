@@ -5,6 +5,7 @@ import (
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"capstone/utils"
 	"errors"
 	"sort"
 )
@@ -31,14 +32,14 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 	return resp, nil
 }
 
-func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Complaint, error) {
-	complaints, err := database.GetComplaintsByCategoryID(categoryID)
+func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.GetComplaintByCategoryIDResponse, error) {
+	complaints, err := database.GetComplaintsByCategoryID(categoryID, sortOrder)
 	if err != nil {
 		return nil, err
 	}
 	publicComplaint := []*model.Complaint{}
 	for _, v := range complaints {
-		if v.IsPublic == true {
+		if v.IsPublic {
 			publicComplaint = append(publicComplaint, v)
 		}
 	}
@@ -51,22 +52,24 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Comp
 		complaint.LikesCount = likesCount
 	}
 
-	switch sortOrder {
-	case constant.Ascending:
-		sort.Slice(publicComplaint, func(i, j int) bool {
-			return publicComplaint[i].CreatedAt.Before(publicComplaint[j].CreatedAt)
-		})
-	case constant.Descending:
-		sort.Slice(publicComplaint, func(i, j int) bool {
-			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
-		})
-	default:
-		sort.Slice(publicComplaint, func(i, j int) bool {
-			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
+	resp := []*payload.GetComplaintByCategoryIDResponse{}
+	for _, v := range publicComplaint {
+		resp = append(resp, &payload.GetComplaintByCategoryIDResponse{
+			ID:           v.ID,
+			PhotoProfile: utils.ConvertToNullString(v.User.PhotoProfile),
+			FullName:     v.User.FullName,
+			Username:     v.User.Username,
+			Category:     v.Category.Name,
+			Description:  v.Description,
+			PhotoURL:     utils.ConvertToNullString(v.PhotoURL),
+			VideoURL:     utils.ConvertToNullString(v.VideoURL),
+			IsPublic:     v.IsPublic,
+			Feedback:     v.Feedback.Description,
+			LikesCount:   v.LikesCount,
+			CreatedAt:    v.CreatedAt,
 		})
 	}
-
-	return publicComplaint, nil
+	return resp, nil
 }
 
 func GetUserComplaintsByStatus(userID uint, status string) ([]*payload.GetComplaintByStatusResponse, error) {
