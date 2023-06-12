@@ -82,3 +82,28 @@ func GetTotalAspirations() (uint, error) {
 	}
 	return uint(total), nil
 }
+
+func GetAllComplaints(sortby, typeSort, search string, limit, offset int) ([]*model.Complaint, error) {
+	complaints := []*model.Complaint{}
+	DB := config.DB
+	if sortby == constant.Ascending {
+		DB = DB.Order("created_at asc")
+	}
+	if sortby == constant.Descending {
+		DB = DB.Order("created_at desc")
+	}
+
+	if search != "" {
+		DB = DB.Where("title LIKE ?", "%"+search+"%")
+	}
+
+	if typeSort == constant.Complaint || typeSort == constant.Aspiration {
+		DB = DB.Where("type = ?", typeSort)
+	}
+
+	err := DB.Preload("User").Preload("Category").Preload("Feedback").Limit(limit).Offset(offset).Find(&complaints).Error
+	if err != nil {
+		return nil, err
+	}
+	return complaints, nil
+}

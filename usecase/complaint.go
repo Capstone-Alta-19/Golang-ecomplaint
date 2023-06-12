@@ -132,3 +132,26 @@ func GetTotalComplaints() (*payload.GetTotalComplaintsResponse, error) {
 	}
 	return resp, nil
 }
+
+func GetAllComplaints(sortBy, typeSort, search string, limit, page int) ([]*payload.GetAllComplaintsResponse, error) {
+	offset := utils.GetOffset(limit, page)
+	complaints, err := database.GetAllComplaints(sortBy, typeSort, search, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := []*payload.GetAllComplaintsResponse{}
+	for _, v := range complaints {
+		resp = append(resp, &payload.GetAllComplaintsResponse{
+			ID:          v.ID,
+			Name:        v.User.FullName,
+			Type:        v.Type,
+			Category:    v.Category.Name,
+			Description: v.Description,
+			Status:      v.Status,
+			IsPublic:    v.IsPublic,
+			CreatedAt:   v.CreatedAt,
+		})
+	}
+	return resp, nil
+}

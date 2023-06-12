@@ -142,3 +142,55 @@ func GetTotalComplaintsController(c echo.Context) error {
 		"total":   total,
 	})
 }
+
+func GetAllComplaintsController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	sortBy := c.QueryParam("sort")
+	if sortBy != constant.Ascending && sortBy != constant.Descending {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query")
+	}
+
+	typeSort := c.QueryParam("type")
+	if typeSort != constant.Complaint && typeSort != constant.Aspiration {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid type query")
+	}
+
+	search := c.QueryParam("search")
+
+	page := c.QueryParam("page")
+	if page == "" {
+		page = "1"
+	}
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	limit := c.QueryParam("limit")
+	if limit == "" {
+		limit = "10"
+	}
+
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	complaints, err := usecase.GetAllComplaints(sortBy, typeSort, search, limitInt, pageInt)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "Success",
+		"complaints": complaints,
+	})
+}

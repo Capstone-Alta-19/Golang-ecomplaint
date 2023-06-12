@@ -45,5 +45,6 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.PUT("/news", controller.UpdateNewsController)
 
 	admin.GET("", controller.GetTotalComplaintsController)
+	admin.GET("/complaint", controller.GetAllComplaintsController)
 	admin.GET("/complaint/:id", controller.AdminGetComplaintByIDController)
 }

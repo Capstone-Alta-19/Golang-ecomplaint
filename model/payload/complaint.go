@@ -37,3 +37,14 @@ type GetTotalComplaintsResponse struct {
 	Complaint  uint `json:"complaint"`
 	Aspiration uint `json:"aspiration"`
 }
+
+type GetAllComplaintsResponse struct {
+	ID          uint      `json:"id"`
+	Name        string    `json:"name"`
+	Type        string    `json:"type"`
+	Category    string    `json:"category"`
+	Description string    `json:"description"`
+	Status      string    `json:"status"`
+	IsPublic    bool      `json:"is_public"`
+	CreatedAt   time.Time `json:"created_at"`
+}
