@@ -256,3 +256,24 @@ func UpdateComplaintController(c echo.Context) error {
 		"message": "Success",
 	})
 }
+
+func GetComplaintByIDController(c echo.Context) error {
+	_, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	complaint, err := usecase.GetUserComplaintID(uint(id))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":   "Success",
+		"complaint": complaint,
+	})
+}
