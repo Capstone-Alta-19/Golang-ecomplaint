@@ -13,6 +13,8 @@ import (
 
 func NewRoute(e *echo.Echo, db *gorm.DB) {
 	e.Validator = &utils.CustomValidator{Validator: validator.New()}
+	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.CORS())
 
 	e.POST("/register/user", controller.RegisterUserController)
 	e.POST("/login/user", controller.LoginUserController)
