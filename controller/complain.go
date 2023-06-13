@@ -47,7 +47,12 @@ func GetComplaintsByCategoryIDController(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
 	queryParam := c.QueryParam("sort")
+	if queryParam != constant.Ascending && queryParam != constant.Descending {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query")
+	}
+
 	complaints, err := usecase.GetComplaintsByCategoryID(uint(id), queryParam)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -65,6 +70,10 @@ func GetUserComplaintsByStatusController(c echo.Context) error {
 	}
 
 	status := c.QueryParam("status")
+	if status != constant.StatusAll && status != constant.StatusPending && status != constant.StatusProccess && status != constant.StatusResolved {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid status query")
+	}
+
 	complaints, err := usecase.GetUserComplaintsByStatus(userID, status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -107,6 +116,139 @@ func DeleteComplaintByIDController(c echo.Context) error {
 	}
 
 	err = usecase.DeleteComplaintByID(userID, uint(complaintID))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success",
+	})
+}
+
+func GetTotalComplaintsController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	total, err := usecase.GetTotalComplaints()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success",
+		"total":   total,
+	})
+}
+
+func GetAllComplaintsController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	sortBy := c.QueryParam("sort")
+	if sortBy != constant.Ascending && sortBy != constant.Descending {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query")
+	}
+
+	typeSort := c.QueryParam("type")
+	if typeSort != constant.Complaint && typeSort != constant.Aspiration {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid type query")
+	}
+
+	search := c.QueryParam("search")
+
+	page := c.QueryParam("page")
+	if page == "" {
+		page = "1"
+	}
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	limit := c.QueryParam("limit")
+	if limit == "" {
+		limit = "10"
+	}
+
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	complaints, err := usecase.GetAllComplaints(sortBy, typeSort, search, limitInt, pageInt)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "Success",
+		"complaints": complaints,
+	})
+}
+
+func CreateFeedbackByComplaintIDController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	complaintID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	req := &payload.CreateFeedbackRequest{}
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	_, err = usecase.CreateFeedbackByComplaintID(req, uint(complaintID))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success",
+	})
+}
+
+func UpdateComplaintController(c echo.Context) error {
+	role, _, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if role != constant.Admin && role != constant.SuperAdmin {
+		return echo.NewHTTPError(http.StatusBadRequest, "You are not authorized")
+	}
+
+	complaintID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	req := &payload.UpdateComplaintRequest{}
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	_, err = usecase.UpdateComplaintByID(req, uint(complaintID))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

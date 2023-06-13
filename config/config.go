@@ -1,6 +1,7 @@
 package config
 
 import (
+	"capstone/constant"
 	"capstone/model"
 	"fmt"
 	"os"
@@ -46,6 +47,7 @@ func InitDB() *gorm.DB {
 
 	InitialMigration()
 	InitCategory()
+	AdminSeed()
 	return DB
 }
 
@@ -77,5 +79,19 @@ func InitCategory() {
 		if err != nil {
 			DB.Create(&category)
 		}
+	}
+}
+
+func AdminSeed() {
+	admin := model.Admin{
+		Name:     "Super Admin",
+		Role:     constant.SuperAdmin,
+		Username: "admin",
+		Password: os.Getenv("ADMIN_PASSWORD"),
+	}
+	var exist model.Admin
+	err := DB.Where("username = ?", admin.Username).First(&exist).Error
+	if err != nil {
+		DB.Create(&admin)
 	}
 }
