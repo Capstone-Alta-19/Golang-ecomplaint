@@ -125,6 +125,19 @@ func DeleteComplaintByID(userID, complaintID uint) error {
 	return nil
 }
 
+func AdminDeleteComplaintByID(complaintID uint) error {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return errors.New("complaint not found")
+	}
+
+	err = database.DeleteComplaint(complaint)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetTotalComplaints() (*payload.GetTotalComplaintsResponse, error) {
 	complaint, err := database.GetTotalComplaints()
 	if err != nil {
