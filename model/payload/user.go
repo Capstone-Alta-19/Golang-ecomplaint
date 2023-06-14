@@ -28,8 +28,8 @@ type OtpEmailRequest struct {
 }
 
 type ChangePasswordRequest struct {
-	OldPassword string `json:"old_password" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required"`
+	OldPassword string `json:"old_password" validate:"required,min=6"`
+	NewPassword string `json:"new_password" validate:"required,min=6"`
 }
 
 type GetUserProfileResponse struct {

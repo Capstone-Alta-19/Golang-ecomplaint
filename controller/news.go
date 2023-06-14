@@ -42,7 +42,7 @@ func CreateNewsController(c echo.Context) error {
 		})
 	}
 
-	news, err := usecase.CreateNews(payload.NewsName, payload.Description)
+	news, err := usecase.CreateNews(&payload)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
