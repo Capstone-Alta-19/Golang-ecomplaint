@@ -51,6 +51,9 @@ func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, er
 	if _, err := database.GetUserByEmail(req.Email); err == nil {
 		return nil, errors.New("email already registered")
 	}
+	if _, err := database.GetUserByUsername(req.Username); err == nil {
+		return nil, errors.New("username already registered")
+	}
 
 	newUser := &model.User{
 		FullName: req.Username,
