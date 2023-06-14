@@ -7,6 +7,7 @@ import (
 	"capstone/repository/database"
 	"capstone/utils"
 	"errors"
+	"time"
 )
 
 func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.Complaint, error) {
@@ -65,7 +66,7 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.Ge
 			IsPublic:     v.IsPublic,
 			Feedback:     utils.ConvertToNullString(v.Feedback.Description),
 			LikesCount:   v.LikesCount,
-			CreatedAt:    v.CreatedAt,
+			CreatedAt:    v.CreatedAt.Format("02/01/2006"),
 		})
 	}
 	return resp, nil
@@ -103,7 +104,7 @@ func GetComplaintByID(id uint) (*payload.GetComplaintByIDResponse, error) {
 		PhotoURL:    utils.ConvertToNullString(complaint.PhotoURL),
 		VideoURL:    utils.ConvertToNullString(complaint.VideoURL),
 		IsPublic:    complaint.IsPublic,
-		CreatedAt:   complaint.CreatedAt,
+		CreatedAt:   complaint.CreatedAt.Format("02 January 2006"),
 	}
 	return &resp, nil
 }
@@ -159,7 +160,7 @@ func GetAllComplaints(sortBy, typeSort, search string, limit, page int) ([]*payl
 			Description: v.Description,
 			Status:      v.Status,
 			IsPublic:    v.IsPublic,
-			CreatedAt:   v.CreatedAt,
+			CreatedAt:   v.CreatedAt.Format("02/01/2006"),
 		})
 	}
 	return resp, nil
@@ -204,10 +205,42 @@ func UpdateComplaintByID(req *payload.UpdateComplaintRequest, complaintID uint) 
 	return complaint, nil
 }
 
-func GetUserComplaintID(ComplaintID uint) (*model.Complaint, error) {
+func GetUserComplaintID(ComplaintID, userID uint) (*payload.GetUserComplaintIDResponse, error) {
 	complaint, err := database.GetComplaintByID(ComplaintID)
 	if err != nil {
 		return nil, errors.New("complaint not found")
 	}
-	return complaint, nil
+	user, err := database.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	comments := []payload.GetCommentResponse{}
+	for _, comment := range complaint.Comments {
+		time := time.Since(comment.CreatedAt.Local())
+		comments = append(comments, payload.GetCommentResponse{
+			ID:           comment.ID,
+			PhotoProfile: utils.ConvertToNullString(comment.User.PhotoProfile),
+			FullName:     comment.User.FullName,
+			Username:     comment.User.Username,
+			Description:  comment.Description,
+			CreatedAt:    utils.GetTimeAgo(int64(time.Seconds())),
+		})
+	}
+
+	resp := &payload.GetUserComplaintIDResponse{
+		ID:           complaint.ID,
+		PhotoProfile: utils.ConvertToNullString(complaint.User.PhotoProfile),
+		FullName:     complaint.User.FullName,
+		Username:     complaint.User.Username,
+		Description:  complaint.Description,
+		PhotoURL:     utils.ConvertToNullString(complaint.PhotoURL),
+		VideoURL:     utils.ConvertToNullString(complaint.VideoURL),
+		IsPublic:     complaint.IsPublic,
+		Feedback:     utils.ConvertToNullString(complaint.Feedback.Description),
+		CreatedAt:    complaint.CreatedAt.Format("02/01/2006"),
+		Comments:     comments,
+		UserProfile:  utils.ConvertToNullString(user.PhotoProfile),
+	}
+	return resp, nil
 }
