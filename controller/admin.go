@@ -54,3 +54,24 @@ func LoginAdminController(c echo.Context) error {
 		"admin":   admin,
 	})
 }
+
+func GetAdminController(c echo.Context) error {
+	role, adminID, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	if role != constant.SuperAdmin && role != constant.Admin {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	admin, err := usecase.GetAdminByID(adminID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success Get Admin",
+		"admin":   admin,
+	})
+}

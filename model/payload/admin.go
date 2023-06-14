@@ -15,3 +15,9 @@ type LoginAdminRequest struct {
 type LoginAdminResponse struct {
 	Token string `json:"token"`
 }
+
+type GetAdminProfileResponse struct {
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+}

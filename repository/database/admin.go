@@ -20,3 +20,12 @@ func GetAdminByUsername(username string) (*model.Admin, error) {
 	}
 	return &admin, nil
 }
+
+func GetAdminByID(id uint) (*model.Admin, error) {
+	var admin model.Admin
+	err := config.DB.Where("id = ?", id).First(&admin).Error
+	if err != nil {
+		return nil, err
+	}
+	return &admin, nil
+}

@@ -52,3 +52,18 @@ func LoginAdmin(req payload.LoginAdminRequest) (*model.Admin, error) {
 	admin.Token = token
 	return admin, nil
 }
+
+func GetAdminByID(adminID uint) (*payload.GetAdminProfileResponse, error) {
+	admin, err := database.GetAdminByID(adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := payload.GetAdminProfileResponse{
+		ID:       admin.ID,
+		Name:     admin.Name,
+		Username: admin.Username,
+	}
+
+	return &resp, nil
+}
