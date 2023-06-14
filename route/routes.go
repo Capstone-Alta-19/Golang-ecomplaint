@@ -13,6 +13,8 @@ import (
 
 func NewRoute(e *echo.Echo, db *gorm.DB) {
 	e.Validator = &utils.CustomValidator{Validator: validator.New()}
+	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.CORS())
 
 	e.POST("/register/user", controller.RegisterUserController)
 	e.POST("/login/user", controller.LoginUserController)
@@ -29,6 +31,7 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 
 	user.POST("/complaint/:id/like", controller.LikeByComplaintIDController)
 	user.DELETE("/complaint/:id/like", controller.UnlikeByComplaintIDController)
+	user.GET("/profile", controller.GetUserProfileController)
 
 	user.DELETE("/complaint/:id", controller.DeleteComplaintByIDController)
 	user.GET("/news/:id", controller.GetNewsController)
@@ -43,5 +46,9 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.DELETE("/news/:id", controller.DeleteNewsController)
 	admin.PUT("/news/:id", controller.UpdateNewsController)
 
+	admin.GET("", controller.GetTotalComplaintsController)
+	admin.GET("/complaint", controller.GetAllComplaintsController)
+	admin.POST("/complaint/:id", controller.CreateFeedbackByComplaintIDController)
 	admin.GET("/complaint/:id", controller.AdminGetComplaintByIDController)
+	admin.PUT("/complaint/:id", controller.UpdateComplaintController)
 }

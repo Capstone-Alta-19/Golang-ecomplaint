@@ -9,7 +9,7 @@ import (
 func LikeByComplaintID(userID uint, complaintID uint64) error {
 	complaint, err := database.GetComplaintByID(uint(complaintID))
 	if err != nil {
-		return err
+		return errors.New("complaint not found")
 	}
 	liked, err := database.GetLikeByComplaintIdAndUserId(userID, complaint.ID)
 	if err != nil && err == errors.New("record not found") {
@@ -35,7 +35,7 @@ func LikeByComplaintID(userID uint, complaintID uint64) error {
 func UnLikeByComplaintID(userID uint, complaintID uint64) error {
 	complaint, err := database.GetComplaintByID(uint(complaintID))
 	if err != nil {
-		return err
+		return errors.New("complaint not found")
 	}
 
 	liked, err := database.GetLikeByComplaintIdAndUserId(userID, complaint.ID)

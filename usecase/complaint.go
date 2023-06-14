@@ -5,8 +5,8 @@ import (
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"capstone/utils"
 	"errors"
-	"sort"
 )
 
 func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.Complaint, error) {
@@ -31,14 +31,14 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 	return resp, nil
 }
 
-func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Complaint, error) {
-	complaints, err := database.GetComplaintsByCategoryID(categoryID)
+func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.GetComplaintByCategoryIDResponse, error) {
+	complaints, err := database.GetComplaintsByCategoryID(categoryID, sortOrder)
 	if err != nil {
 		return nil, err
 	}
 	publicComplaint := []*model.Complaint{}
 	for _, v := range complaints {
-		if v.IsPublic == true {
+		if v.IsPublic {
 			publicComplaint = append(publicComplaint, v)
 		}
 	}
@@ -51,71 +51,67 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*model.Comp
 		complaint.LikesCount = likesCount
 	}
 
-	switch sortOrder {
-	case constant.Ascending:
-		sort.Slice(publicComplaint, func(i, j int) bool {
-			return publicComplaint[i].CreatedAt.Before(publicComplaint[j].CreatedAt)
-		})
-	case constant.Descending:
-		sort.Slice(publicComplaint, func(i, j int) bool {
-			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
-		})
-	default:
-		sort.Slice(publicComplaint, func(i, j int) bool {
-			return publicComplaint[i].CreatedAt.After(publicComplaint[j].CreatedAt)
+	resp := []*payload.GetComplaintByCategoryIDResponse{}
+	for _, v := range publicComplaint {
+		resp = append(resp, &payload.GetComplaintByCategoryIDResponse{
+			ID:           v.ID,
+			PhotoProfile: utils.ConvertToNullString(v.User.PhotoProfile),
+			FullName:     v.User.FullName,
+			Username:     v.User.Username,
+			Category:     v.Category.Name,
+			Description:  v.Description,
+			PhotoURL:     utils.ConvertToNullString(v.PhotoURL),
+			VideoURL:     utils.ConvertToNullString(v.VideoURL),
+			IsPublic:     v.IsPublic,
+			Feedback:     utils.ConvertToNullString(v.Feedback.Description),
+			LikesCount:   v.LikesCount,
+			CreatedAt:    v.CreatedAt,
 		})
 	}
-
-	return publicComplaint, nil
+	return resp, nil
 }
 
 func GetUserComplaintsByStatus(userID uint, status string) ([]*payload.GetComplaintByStatusResponse, error) {
-	complaints, err := database.GetComplaintsByUserID(userID)
+	complaints, err := database.GetComplaintsByUserID(userID, status)
 	if err != nil {
 		return nil, err
 	}
-	sort.Slice(complaints, func(i, j int) bool {
-		return complaints[i].CreatedAt.After(complaints[j].CreatedAt)
-	})
 
-	if status == constant.StatusAll {
-		resp := []*payload.GetComplaintByStatusResponse{}
-		for _, v := range complaints {
-			resp = append(resp, &payload.GetComplaintByStatusResponse{
-				ID:          v.ID,
-				Description: v.Description,
-				Status:      v.Status,
-			})
-		}
-		return resp, nil
-	}
-
-	userComplaints := []*payload.GetComplaintByStatusResponse{}
+	resp := []*payload.GetComplaintByStatusResponse{}
 	for _, v := range complaints {
-		if v.Status == status {
-			userComplaints = append(userComplaints, &payload.GetComplaintByStatusResponse{
-				ID:          v.ID,
-				Description: v.Description,
-				Status:      v.Status,
-			})
-		}
+		resp = append(resp, &payload.GetComplaintByStatusResponse{
+			ID:          v.ID,
+			Description: v.Description,
+			Status:      v.Status,
+		})
 	}
 
-	return userComplaints, nil
+	return resp, nil
 }
 
-func GetComplaintByID(id uint) (*model.Complaint, error) {
+func GetComplaintByID(id uint) (*payload.GetComplaintByIDResponse, error) {
 	complaint, err := database.GetComplaintByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("complaint not found")
 	}
-	return complaint, nil
+	resp := payload.GetComplaintByIDResponse{
+		ID:          complaint.ID,
+		FullName:    complaint.User.FullName,
+		Type:        complaint.Type,
+		Category:    complaint.Category.Name,
+		Description: complaint.Description,
+		PhotoURL:    utils.ConvertToNullString(complaint.PhotoURL),
+		VideoURL:    utils.ConvertToNullString(complaint.VideoURL),
+		IsPublic:    complaint.IsPublic,
+		CreatedAt:   complaint.CreatedAt,
+	}
+	return &resp, nil
 }
 
 func DeleteComplaintByID(userID, complaintID uint) error {
 	complaint, err := database.GetComplaintByID(complaintID)
 	if err != nil {
-		return err
+		return errors.New("complaint not found")
 	}
 	if complaint.UserID != userID {
 		return errors.New("you are not the owner of this complaint")
@@ -126,4 +122,92 @@ func DeleteComplaintByID(userID, complaintID uint) error {
 		return err
 	}
 	return nil
+}
+
+func GetTotalComplaints() (*payload.GetTotalComplaintsResponse, error) {
+	complaint, err := database.GetTotalComplaints()
+	if err != nil {
+		return nil, err
+	}
+	Aspiration, err := database.GetTotalAspirations()
+	if err != nil {
+		return nil, err
+	}
+	total := complaint + Aspiration
+	resp := &payload.GetTotalComplaintsResponse{
+		Total:      total,
+		Complaint:  complaint,
+		Aspiration: Aspiration,
+	}
+	return resp, nil
+}
+
+func GetAllComplaints(sortBy, typeSort, search string, limit, page int) ([]*payload.GetAllComplaintsResponse, error) {
+	offset := utils.GetOffset(limit, page)
+	complaints, err := database.GetAllComplaints(sortBy, typeSort, search, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := []*payload.GetAllComplaintsResponse{}
+	for _, v := range complaints {
+		resp = append(resp, &payload.GetAllComplaintsResponse{
+			ID:          v.ID,
+			Name:        v.User.FullName,
+			Type:        v.Type,
+			Category:    v.Category.Name,
+			Description: v.Description,
+			Status:      v.Status,
+			IsPublic:    v.IsPublic,
+			CreatedAt:   v.CreatedAt,
+		})
+	}
+	return resp, nil
+}
+
+func CreateFeedbackByComplaintID(req *payload.CreateFeedbackRequest, complaintID uint) (*model.Feedback, error) {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return nil, errors.New("complaint not found")
+	}
+	resp := &model.Feedback{
+		ComplaintID: complaint.ID,
+		Description: req.Description,
+	}
+
+	err = database.CreateFeedback(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	complaint.Status = constant.StatusResolved
+	err = database.UpdateComplaint(complaint)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func UpdateComplaintByID(req *payload.UpdateComplaintRequest, complaintID uint) (*model.Complaint, error) {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return nil, errors.New("complaint not found")
+	}
+
+	complaint.Status = req.Status
+	complaint.Type = req.Type
+
+	err = database.UpdateComplaint(complaint)
+	if err != nil {
+		return nil, err
+	}
+	return complaint, nil
+}
+
+func GetUserComplaintID(ComplaintID uint) (*model.Complaint, error) {
+	complaint, err := database.GetComplaintByID(ComplaintID)
+	if err != nil {
+		return nil, errors.New("complaint not found")
+	}
+	return complaint, nil
 }

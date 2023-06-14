@@ -90,3 +90,20 @@ func ChangePasswordController(c echo.Context) error {
 		"message": "success update password",
 	})
 }
+
+func GetUserProfileController(c echo.Context) error {
+	userId, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only User Can Access This Feature")
+	}
+
+	user, err := usecase.GetUserProfile(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success get user profile",
+		"user":    user,
+	})
+}
