@@ -29,3 +29,10 @@ func GetAdminByID(id uint) (*model.Admin, error) {
 	}
 	return &admin, nil
 }
+
+func UpdateAdmin(admin *model.Admin) error {
+	if err := config.DB.Save(admin).Error; err != nil {
+		return err
+	}
+	return nil
+}

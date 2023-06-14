@@ -54,4 +54,5 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	admin.PUT("/complaint/:id", controller.UpdateComplaintController)
 	admin.DELETE("/complaint/:id", controller.AdminDeleteComplaintByIDController)
 	admin.GET("/admin", controller.GetAdminController)
+	admin.PUT("/admin", controller.UpdateAdminController)
 }

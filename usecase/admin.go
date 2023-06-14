@@ -67,3 +67,31 @@ func GetAdminByID(adminID uint) (*payload.GetAdminProfileResponse, error) {
 
 	return &resp, nil
 }
+
+func UpdateAdminByID(adminID uint, req payload.UpdateAdminRequest) error {
+	admin, err := database.GetAdminByID(adminID)
+	if err != nil {
+		return err
+	}
+	if req.Name != "" {
+		admin.Name = req.Name
+	}
+	if req.Username != "" {
+		admin.Username = req.Username
+	}
+
+	if req.OldPassword != admin.Password {
+		return errors.New("wrong old password")
+	} else if req.NewPassword != req.ConfirmPassword {
+		return errors.New("new password and confirm password not match")
+	}
+
+	admin.Password = req.NewPassword
+
+	err = database.UpdateAdmin(admin)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
