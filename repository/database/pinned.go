@@ -14,6 +14,18 @@ func GetPinnedByComplaintIdAndUserId(userID, complaintID uint) (*model.PinnedCom
 	return &pinned, nil
 }
 
+func GetPinnedComplaintsByUserId(userID uint) ([]model.PinnedComplaint, error) {
+	var pinned []model.PinnedComplaint
+	DB := config.DB
+	DB = DB.Order("created_at desc")
+
+	err := DB.Preload("User").Preload("Complaint").Where("user_id = ?", userID).Find(&pinned).Error
+	if err != nil {
+		return nil, err
+	}
+	return pinned, nil
+}
+
 func AddPinnedComplaint(pinned *model.PinnedComplaint) error {
 	err := config.DB.Create(pinned).Error
 	if err != nil {

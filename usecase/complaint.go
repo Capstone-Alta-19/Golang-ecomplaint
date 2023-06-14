@@ -304,3 +304,33 @@ func UnpinnedComplaint(userID, complaintID uint) error {
 	}
 	return nil
 }
+
+func GetPinnedComplaint(userID uint) ([]*payload.GetPinnedComplaintResponse, error) {
+	pinned, err := database.GetPinnedComplaintsByUserId(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := []*payload.GetPinnedComplaintResponse{}
+	for _, v := range pinned {
+		likesCount, err := database.GetLikesCountByComplaintID(v.ComplaintID)
+		if err != nil {
+			return nil, err
+		}
+		v.Complaint.LikesCount = likesCount
+
+		resp = append(resp, &payload.GetPinnedComplaintResponse{
+			ID:           v.ID,
+			PhotoProfile: utils.ConvertToNullString(v.User.PhotoProfile),
+			FullName:     v.User.FullName,
+			Username:     v.User.Username,
+			Description:  v.Complaint.Description,
+			PhotoURL:     utils.ConvertToNullString(v.Complaint.PhotoURL),
+			VideoURL:     utils.ConvertToNullString(v.Complaint.VideoURL),
+			Feedback:     utils.ConvertToNullString(v.Complaint.Feedback.Description),
+			LikesCount:   v.Complaint.LikesCount,
+			CreatedAt:    v.CreatedAt.Format("02/01/2006"),
+		})
+	}
+	return resp, nil
+}

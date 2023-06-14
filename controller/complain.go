@@ -342,3 +342,20 @@ func UnpinnedComplaintByIDController(c echo.Context) error {
 		"message": "Success",
 	})
 }
+
+func GetPinnedComplaintController(c echo.Context) error {
+	userID, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	complaints, err := usecase.GetPinnedComplaint(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "Success",
+		"complaints": complaints,
+	})
+}
