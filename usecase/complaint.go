@@ -46,16 +46,14 @@ func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.Ge
 		}
 	}
 
-	for _, complaint := range publicComplaint {
-		likesCount, err := database.GetLikesCountByComplaintID(complaint.ID)
+	resp := []*payload.GetComplaintByCategoryIDResponse{}
+	for _, v := range publicComplaint {
+		likesCount, err := database.GetLikesCountByComplaintID(v.ID)
 		if err != nil {
 			return nil, err
 		}
-		complaint.LikesCount = likesCount
-	}
+		v.LikesCount = likesCount
 
-	resp := []*payload.GetComplaintByCategoryIDResponse{}
-	for _, v := range publicComplaint {
 		resp = append(resp, &payload.GetComplaintByCategoryIDResponse{
 			ID:           v.ID,
 			PhotoProfile: utils.ConvertToNullString(v.User.PhotoProfile),
