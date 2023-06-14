@@ -85,14 +85,21 @@ func UpdateAdminByID(adminID uint, req payload.UpdateAdminRequest) error {
 		admin.Username = req.Username
 	}
 
-	if req.OldPassword != admin.Password {
-		return errors.New("wrong old password")
-	} else if req.NewPassword != req.ConfirmPassword {
+	err = bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.OldPassword))
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return errors.New("old password is not correct")
+	}
+
+	if req.NewPassword != req.ConfirmPassword {
 		return errors.New("new password and confirm password not match")
 	}
 
-	admin.Password = req.NewPassword
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
 
+	admin.Password = string(passwordHash)
 	err = database.UpdateAdmin(admin)
 	if err != nil {
 		return err
