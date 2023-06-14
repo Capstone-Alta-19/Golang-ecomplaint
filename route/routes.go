@@ -23,25 +23,26 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	e.POST("/upload", controller.UploadFileController)
 
 	// user collection
-	user := e.Group("/user", middleware.JWT([]byte(constant.SECRET_JWT)))
+	user := e.Group("/complaintz", middleware.JWT([]byte(constant.SECRET_JWT)))
 	user.POST("/complaint", controller.CreateComplaintController)
 	user.GET("/complaint", controller.GetUserComplaintsByStatusController)
 	user.GET("/complaint/:id", controller.GetComplaintByIDController)
+	user.DELETE("/complaint/:id", controller.DeleteComplaintByIDController)
 	user.GET("/complaint/category/:id", controller.GetComplaintsByCategoryIDController)
 	user.POST("/complaint/:id/comment", controller.CreateCommentByComplaintIDController)
 
 	user.POST("/complaint/:id/like", controller.LikeByComplaintIDController)
 	user.DELETE("/complaint/:id/like", controller.UnlikeByComplaintIDController)
-	user.GET("/profile", controller.GetUserProfileController)
+	user.GET("/user", controller.GetUserProfileController)
 
-	user.DELETE("/complaint/:id", controller.DeleteComplaintByIDController)
 	user.GET("/news/:id", controller.GetNewsController)
-	user.PUT("/:id", controller.UpdateUserController)
-	user.PUT("/password", controller.ChangePasswordController)
+	user.PUT("/user/:id", controller.UpdateUserController)
+	user.PUT("/user/password", controller.ChangePasswordController)
 
 	// admin collection
-	admin := e.Group("/admin", middleware.JWT([]byte(constant.SECRET_JWT)))
-	admin.POST("/add", controller.AddAdminController)
+	admin := e.Group("/dashboard", middleware.JWT([]byte(constant.SECRET_JWT)))
+	admin.POST("/admin", controller.AddAdminController)
+
 	admin.POST("/news", controller.CreateNewsController)
 	admin.DELETE("/news/:id", controller.DeleteNewsController)
 	admin.PUT("/news/:id", controller.UpdateNewsController)
