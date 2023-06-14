@@ -67,3 +67,10 @@ func GetUserByID(id uint) (*model.User, error) {
 	}
 	return &user, nil
 }
+
+func DeleteUser(user *model.User) error {
+	if err := config.DB.Delete(user).Error; err != nil {
+		return err
+	}
+	return nil
+}

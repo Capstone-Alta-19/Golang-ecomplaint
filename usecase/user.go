@@ -155,3 +155,15 @@ func GetUserProfile(userID uint) (*payload.GetUserProfileResponse, error) {
 	}
 	return &resp, nil
 }
+
+func DeleteUserByID(userID uint) error {
+	user, err := database.GetUserByID(userID)
+	if err != nil {
+		return err
+	}
+	err = database.DeleteUser(user)
+	if err != nil {
+		return err
+	}
+	return nil
+}
