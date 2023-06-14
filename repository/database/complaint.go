@@ -115,3 +115,20 @@ func UpdateComplaint(complaint *model.Complaint) error {
 	}
 	return nil
 }
+
+func GetPinnedByComplaintIdAndUserId(userID, complaintID uint) (*model.PinnedComplaint, error) {
+	var pinned model.PinnedComplaint
+	err := config.DB.Where("user_id = ? AND complaint_id = ?", userID, complaintID).First(&pinned).Error
+	if err != nil {
+		return nil, err
+	}
+	return &pinned, nil
+}
+
+func AddPinnedComplaint(pinned *model.PinnedComplaint) error {
+	err := config.DB.Create(pinned).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

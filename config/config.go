@@ -62,6 +62,7 @@ func InitialMigration() {
 		&model.Comment{},
 		&model.Like{},
 		&model.Feedback{},
+		&model.PinnedComplaint{},
 	)
 }
 

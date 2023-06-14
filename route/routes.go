@@ -31,6 +31,7 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	user.GET("/complaint/category/:id", controller.GetComplaintsByCategoryIDController)
 	user.POST("/complaint/:id/comment", controller.CreateCommentByComplaintIDController)
 
+	user.POST("/complaint/:id/Pin", controller.PinnedComplaintByIDController)
 	user.POST("/complaint/:id/like", controller.LikeByComplaintIDController)
 	user.DELETE("/complaint/:id/like", controller.UnlikeByComplaintIDController)
 	user.GET("/user", controller.GetUserProfileController)

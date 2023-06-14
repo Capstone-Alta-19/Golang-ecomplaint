@@ -257,3 +257,28 @@ func GetUserComplaintID(ComplaintID, userID uint) (*payload.GetUserComplaintIDRe
 	}
 	return resp, nil
 }
+
+func PinnedComplaint(userID, complaintID uint) error {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return errors.New("complaint not found")
+	}
+	pinned, err := database.GetPinnedByComplaintIdAndUserId(userID, complaint.ID)
+	if err != nil && err == errors.New("record not found") {
+		return err
+	}
+	if pinned != nil {
+		return errors.New("you have pinned this complaint")
+	}
+
+	pin := &model.PinnedComplaint{
+		UserID:      userID,
+		ComplaintID: complaint.ID,
+	}
+
+	err = database.AddPinnedComplaint(pin)
+	if err != nil {
+		return err
+	}
+	return nil
+}
