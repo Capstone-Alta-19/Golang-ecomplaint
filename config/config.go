@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -61,6 +62,7 @@ func InitialMigration() {
 		&model.Comment{},
 		&model.Like{},
 		&model.Feedback{},
+		&model.PinnedComplaint{},
 	)
 }
 
@@ -83,14 +85,19 @@ func InitCategory() {
 }
 
 func AdminSeed() {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(os.Getenv("ADMIN_PASSWORD")), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
+	}
+
 	admin := model.Admin{
 		Name:     "Super Admin",
 		Role:     constant.SuperAdmin,
 		Username: "admin",
-		Password: os.Getenv("ADMIN_PASSWORD"),
+		Password: string(passwordHash),
 	}
 	var exist model.Admin
-	err := DB.Where("username = ?", admin.Username).First(&exist).Error
+	err = DB.Where("username = ?", admin.Username).First(&exist).Error
 	if err != nil {
 		DB.Create(&admin)
 	}

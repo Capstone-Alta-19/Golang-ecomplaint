@@ -24,6 +24,16 @@ func GetUserByUsernameOrEmail(UsernameOrEmail string) (*model.User, error) {
 	return &user, nil
 }
 
+func GetUserByUsername(Username string) (*model.User, error) {
+	var user model.User
+
+	err := config.DB.Where("username = ?", Username).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func GetUserByEmail(Email string) (*model.User, error) {
 	var user model.User
 
@@ -56,4 +66,11 @@ func GetUserByID(id uint) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func DeleteUser(user *model.User) error {
+	if err := config.DB.Delete(user).Error; err != nil {
+		return err
+	}
+	return nil
 }

@@ -4,6 +4,8 @@ import (
 	"capstone/model"
 	"capstone/repository/database"
 	"errors"
+
+	"gorm.io/gorm"
 )
 
 func LikeByComplaintID(userID uint, complaintID uint64) error {
@@ -39,7 +41,7 @@ func UnLikeByComplaintID(userID uint, complaintID uint64) error {
 	}
 
 	liked, err := database.GetLikeByComplaintIdAndUserId(userID, complaint.ID)
-	if err != nil {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
 

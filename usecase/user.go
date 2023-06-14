@@ -51,8 +51,12 @@ func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, er
 	if _, err := database.GetUserByEmail(req.Email); err == nil {
 		return nil, errors.New("email already registered")
 	}
+	if _, err := database.GetUserByUsername(req.Username); err == nil {
+		return nil, errors.New("username already registered")
+	}
 
 	newUser := &model.User{
+		FullName: req.Username,
 		Username: req.Username,
 		Email:    req.Email,
 		Password: string(passwordHash),
@@ -150,4 +154,16 @@ func GetUserProfile(userID uint) (*payload.GetUserProfileResponse, error) {
 		Resolved:     resolved,
 	}
 	return &resp, nil
+}
+
+func DeleteUserByID(userID uint) error {
+	user, err := database.GetUserByID(userID)
+	if err != nil {
+		return err
+	}
+	err = database.DeleteUser(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
