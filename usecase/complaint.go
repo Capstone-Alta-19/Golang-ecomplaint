@@ -203,3 +203,11 @@ func UpdateComplaintByID(req *payload.UpdateComplaintRequest, complaintID uint) 
 	}
 	return complaint, nil
 }
+
+func GetUserComplaintID(ComplaintID uint) (*model.Complaint, error) {
+	complaint, err := database.GetComplaintByID(ComplaintID)
+	if err != nil {
+		return nil, errors.New("complaint not found")
+	}
+	return complaint, nil
+}
