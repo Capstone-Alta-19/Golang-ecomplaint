@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -17,13 +18,17 @@ func CreateAdmin(req payload.AddAdminRequest) (*model.Admin, error) {
 	_, err := database.GetAdminByUsername(req.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+			if err != nil {
+				return nil, err
+			}
 			newAdmin := model.Admin{
 				Name:     req.Name,
 				Role:     req.Role,
 				Username: req.Username,
-				Password: req.Password,
+				Password: string(passwordHash),
 			}
-			err := database.CreateAdmin(&newAdmin)
+			err = database.CreateAdmin(&newAdmin)
 			if err != nil {
 				return nil, err
 			}
