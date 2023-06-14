@@ -8,6 +8,8 @@ import (
 	"capstone/utils"
 	"errors"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.Complaint, error) {
@@ -277,6 +279,26 @@ func PinnedComplaint(userID, complaintID uint) error {
 	}
 
 	err = database.AddPinnedComplaint(pin)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UnpinnedComplaint(userID, complaintID uint) error {
+	complaint, err := database.GetComplaintByID(complaintID)
+	if err != nil {
+		return errors.New("complaint not found")
+	}
+	pinned, err := database.GetPinnedByComplaintIdAndUserId(userID, complaint.ID)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if pinned == nil {
+		return errors.New("you have not pinned this complaint")
+	}
+
+	err = database.DeletePinnedComplaint(pinned)
 	if err != nil {
 		return err
 	}

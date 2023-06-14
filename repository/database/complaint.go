@@ -132,3 +132,11 @@ func AddPinnedComplaint(pinned *model.PinnedComplaint) error {
 	}
 	return nil
 }
+
+func DeletePinnedComplaint(pinned *model.PinnedComplaint) error {
+	err := config.DB.Delete(pinned).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
