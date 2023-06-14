@@ -53,6 +53,7 @@ func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, er
 	}
 
 	newUser := &model.User{
+		FullName: req.Username,
 		Username: req.Username,
 		Email:    req.Email,
 		Password: string(passwordHash),
