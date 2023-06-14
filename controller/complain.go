@@ -158,7 +158,7 @@ func GetAllComplaintsController(c echo.Context) error {
 	}
 
 	typeSort := c.QueryParam("type")
-	if typeSort != constant.Complaint && typeSort != constant.Aspiration {
+	if typeSort != constant.Complaint && typeSort != constant.Aspiration && typeSort != constant.StatusAll {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid type query")
 	}
 
@@ -258,7 +258,7 @@ func UpdateComplaintController(c echo.Context) error {
 }
 
 func GetComplaintByIDController(c echo.Context) error {
-	_, err := middleware.ExtractTokenUserId(c)
+	userID, err := middleware.ExtractTokenUserId(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -268,7 +268,7 @@ func GetComplaintByIDController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	complaint, err := usecase.GetUserComplaintID(uint(id))
+	complaint, err := usecase.GetUserComplaintID(uint(id), userID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
