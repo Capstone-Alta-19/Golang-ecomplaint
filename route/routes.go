@@ -45,6 +45,7 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 
 	// admin collection
 	admin := e.Group("/dashboard", middleware.JWT([]byte(constant.SECRET_JWT)))
+	admin.GET("/notification", controller.GetNotificationController)
 	admin.POST("/admin", controller.AddAdminController)
 	admin.GET("/admin", controller.GetAdminController)
 	admin.PUT("/admin", controller.UpdateAdminController)

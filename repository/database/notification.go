@@ -12,3 +12,15 @@ func CreateNotification(notification *model.Notification) error {
 	}
 	return nil
 }
+
+func GetNotification() ([]*model.Notification, error) {
+	var notifications []*model.Notification
+	DB := config.DB
+	DB = DB.Order("created_at desc")
+
+	err := DB.Preload("User").Preload("Complaint.Category").Find(&notifications).Error
+	if err != nil {
+		return nil, err
+	}
+	return notifications, nil
+}
