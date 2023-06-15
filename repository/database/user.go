@@ -52,14 +52,6 @@ func UpdateUser(user *model.User) error {
 	return nil
 }
 
-// login user
-func LoginUser(user *model.User) error {
-	if err := config.DB.Where("email = ? AND password = ?", user.Email, user.Password).First(&user).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
 func GetUserByID(id uint) (*model.User, error) {
 	var user model.User
 	if err := config.DB.Where("id = ?", id).First(&user).Error; err != nil {

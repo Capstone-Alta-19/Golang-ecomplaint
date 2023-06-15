@@ -31,6 +31,16 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 	if err != nil {
 		return nil, err
 	}
+
+	notif := &model.Notification{
+		UserID:      UserID,
+		ComplaintID: resp.ID,
+	}
+
+	err = database.CreateNotification(notif)
+	if err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
