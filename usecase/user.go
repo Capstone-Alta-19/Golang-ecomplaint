@@ -18,7 +18,7 @@ func LoginUser(usernameOrEmail, password string) (*payload.LoginUserResponse, er
 	user, err := database.GetUserByUsernameOrEmail(usernameOrEmail)
 	if err != nil {
 		fmt.Println("LoginUser: Error getting user from the database")
-		return nil, err
+		return nil, errors.New("username or email not found")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))

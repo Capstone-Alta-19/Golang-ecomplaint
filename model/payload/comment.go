@@ -1,7 +1,7 @@
 package payload
 
 type CreateCommentRequest struct {
-	Description string `json:"description" validate:"required"`
+	Description string `json:"description" validate:"required,max=150"`
 }
 
 type GetCommentResponse struct {

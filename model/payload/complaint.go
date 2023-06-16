@@ -2,7 +2,7 @@ package payload
 
 type CreateComplaintRequest struct {
 	Type        string `json:"type" validate:"required,oneof=Complaint Aspiration"`
-	Description string `json:"description" validate:"required"`
+	Description string `json:"description" validate:"required,max=150"`
 	PhotoURL    string `json:"photo_url"`
 	VideoURL    string `json:"video_url"`
 	CategoryID  uint   `json:"category_id" validate:"required"`
