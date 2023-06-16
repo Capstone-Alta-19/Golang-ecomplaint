@@ -4,6 +4,7 @@ type CreateUserRequest struct {
 	Username        string `json:"username" validate:"required"`
 	Email           string `json:"email" validate:"required,email"`
 	Phone           string `json:"phone" validate:"required"`
+	DateBirth       string `json:"date_birth" validate:"required"`
 	Password        string `json:"password" validate:"required,min=6"`
 	ConfirmPassword string `json:"confirm_password" validate:"required"`
 }
