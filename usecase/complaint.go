@@ -45,6 +45,11 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 }
 
 func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.GetComplaintByCategoryIDResponse, error) {
+	_, err := database.GetCategoryByID(categoryID)
+	if err != nil {
+		return nil, errors.New("category not found")
+	}
+
 	complaints, err := database.GetComplaintsByCategoryID(categoryID, sortOrder)
 	if err != nil {
 		return nil, err
