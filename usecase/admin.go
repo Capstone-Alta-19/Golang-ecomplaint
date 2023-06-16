@@ -7,9 +7,7 @@ import (
 	"capstone/repository/database"
 	"errors"
 	"fmt"
-	"net/http"
 
-	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -40,14 +38,17 @@ func CreateAdmin(req payload.AddAdminRequest) (*model.Admin, error) {
 	return nil, errors.New("username already used")
 }
 
-func LoginAdmin(req payload.LoginAdminRequest) (*model.Admin, error) {
+func LoginAdmin(req payload.LoginAdminRequest) (*payload.LoginAdminResponse, error) {
 	admin, err := database.GetAdminByUsername(req.Username)
 	if err != nil {
 		return nil, err
 	}
-	if admin.Password != req.Password {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "Wrong Password")
+	err = bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.Password))
+
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return nil, errors.New("wrong password")
 	}
+
 	// generate jwt
 	token, err := middleware.CreateToken(admin.ID, admin.Role)
 	if err != nil {
@@ -55,7 +56,10 @@ func LoginAdmin(req payload.LoginAdminRequest) (*model.Admin, error) {
 		return nil, err
 	}
 	admin.Token = token
-	return admin, nil
+	resp := payload.LoginAdminResponse{
+		Token: token,
+	}
+	return &resp, nil
 }
 
 func GetAdminByID(adminID uint) (*payload.GetAdminProfileResponse, error) {
