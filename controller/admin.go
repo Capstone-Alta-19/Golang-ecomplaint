@@ -46,7 +46,7 @@ func LoginAdminController(c echo.Context) error {
 
 	admin, err := usecase.LoginAdmin(req)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
