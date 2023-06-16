@@ -50,7 +50,7 @@ func GetComplaintsByCategoryIDController(c echo.Context) error {
 
 	queryParam := c.QueryParam("sort")
 	if queryParam != constant.Ascending && queryParam != constant.Descending {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query,must be 'asc' or 'desc'")
 	}
 
 	complaints, err := usecase.GetComplaintsByCategoryID(uint(id), queryParam)
@@ -71,7 +71,7 @@ func GetUserComplaintsByStatusController(c echo.Context) error {
 
 	status := c.QueryParam("status")
 	if status != constant.StatusAll && status != constant.StatusPending && status != constant.StatusProccess && status != constant.StatusResolved {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid status query")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid status query, must be 'All' or 'Pending' or 'Proccess' or 'Resolved'")
 	}
 
 	complaints, err := usecase.GetUserComplaintsByStatus(userID, status)
@@ -154,12 +154,12 @@ func GetAllComplaintsController(c echo.Context) error {
 
 	sortBy := c.QueryParam("sort")
 	if sortBy != constant.Ascending && sortBy != constant.Descending {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid sort query, must be 'asc' or 'desc'")
 	}
 
 	typeSort := c.QueryParam("type")
 	if typeSort != constant.Complaint && typeSort != constant.Aspiration && typeSort != constant.StatusAll {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid type query")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid type query, must be 'Complaint' or 'Aspiration' or 'All'")
 	}
 
 	search := c.QueryParam("search")
