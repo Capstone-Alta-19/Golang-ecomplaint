@@ -1,10 +1,12 @@
 package usecase
 
 import (
+	"capstone/constant"
 	"capstone/middleware"
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"capstone/utils"
 	"errors"
 	"fmt"
 
@@ -49,8 +51,12 @@ func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, er
 	if _, err := database.GetUserByEmail(req.Email); err == nil {
 		return nil, errors.New("email already registered")
 	}
+	if _, err := database.GetUserByUsername(req.Username); err == nil {
+		return nil, errors.New("username already registered")
+	}
 
 	newUser := &model.User{
+		FullName: req.Username,
 		Username: req.Username,
 		Email:    req.Email,
 		Password: string(passwordHash),
@@ -82,15 +88,6 @@ func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, er
 	return &result, nil
 }
 
-func GetListUsers() (users []model.User, err error) {
-	users, err = database.GetUsers()
-	if err != nil {
-		fmt.Println("GetListUsers: Error getting users from the database")
-		return
-	}
-	return
-}
-
 func UpdateUser(user *model.User) (err error) {
 	err = database.UpdateUser(user)
 	if err != nil {
@@ -98,4 +95,75 @@ func UpdateUser(user *model.User) (err error) {
 		return
 	}
 	return
+}
+
+func ChangePasswordUser(UserID uint, payload *payload.ChangePasswordRequest) (err error) {
+	user, err := database.GetUserByID(UserID)
+	if err != nil {
+		fmt.Println("GetUserByID: Error Get user, err:", err)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.OldPassword))
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return errors.New("wrong password")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(payload.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.Password = string(passwordHash)
+	err = database.UpdateUser(user)
+	if err != nil {
+		fmt.Println("ChangePassword: Error Change Password, err:", err)
+		return
+	}
+	return
+}
+
+func GetUserProfile(userID uint) (*payload.GetUserProfileResponse, error) {
+	user, err := database.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	complaints, err := database.GetComplaintsByUserID(user.ID, constant.StatusAll)
+	if err != nil {
+		return nil, err
+	}
+	var laporan, pending, proccess, resolved uint
+	for _, complaint := range complaints {
+		switch complaint.Status {
+		case constant.StatusPending:
+			pending++
+		case constant.StatusProccess:
+			proccess++
+		case constant.StatusResolved:
+			resolved++
+		}
+		laporan++
+	}
+	resp := payload.GetUserProfileResponse{
+		ID:           user.ID,
+		PhotoProfile: utils.ConvertToNullString(user.PhotoProfile),
+		FullName:     user.FullName,
+		Laporan:      laporan,
+		Pending:      pending,
+		Proccess:     proccess,
+		Resolved:     resolved,
+	}
+	return &resp, nil
+}
+
+func DeleteUserByID(userID uint) error {
+	user, err := database.GetUserByID(userID)
+	if err != nil {
+		return err
+	}
+	err = database.DeleteUser(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

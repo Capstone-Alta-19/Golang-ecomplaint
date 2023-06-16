@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"capstone/constant"
 	"capstone/middleware"
 	"capstone/model"
 	"capstone/model/payload"
@@ -8,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 func GetNewsController(c echo.Context) error {
@@ -24,12 +25,13 @@ func GetNewsController(c echo.Context) error {
 }
 
 func CreateNewsController(c echo.Context) error {
-	_, err := middleware.ExtractTokenAdminId(c, "Admin Berita")
+	role, _, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-			"message": "only admin news can access",
-			"error":   err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	if role != constant.Admin {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
 	}
 
 	payload := payload.CreateNews{}
@@ -40,7 +42,7 @@ func CreateNewsController(c echo.Context) error {
 		})
 	}
 
-	news, err := usecase.CreateNews(payload.NewsName, payload.Description)
+	news, err := usecase.CreateNews(&payload)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -68,12 +70,13 @@ func DeleteNewsController(c echo.Context) error {
 }
 
 func UpdateNewsController(c echo.Context) error {
-	_, err := middleware.ExtractTokenAdminId(c, "Admin Berita")
+	role, _, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, map[string]interface{}{
-			"message": "only admin news can access",
-			"error":   err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	if role != constant.Admin {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
 	}
 
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
