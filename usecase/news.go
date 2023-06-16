@@ -2,16 +2,25 @@ package usecase
 
 import (
 	"capstone/model"
+	"capstone/model/payload"
 	"capstone/repository/database"
+	"errors"
 	"fmt"
+	"time"
 )
 
-func CreateNews(NewsName, Description string) (*model.News, error) {
-	resp := &model.News{
-		NewsName:    NewsName,
-		Description: Description,
+func CreateNews(req *payload.CreateNews) (*model.News, error) {
+	category, err := database.GetCategoryByID(req.CategoryID)
+	if err != nil {
+		return nil, errors.New("category not found")
 	}
-	err := database.CreateNews(resp)
+	resp := &model.News{
+		NewsName:    req.NewsName,
+		Description: req.Description,
+		CategoryID:  category.ID,
+		Time:        time.Now(),
+	}
+	err = database.CreateNews(resp)
 	if err != nil {
 		return nil, err
 	}

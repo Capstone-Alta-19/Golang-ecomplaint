@@ -107,3 +107,19 @@ func GetUserProfileController(c echo.Context) error {
 		"user":    user,
 	})
 }
+
+func DeleteUserController(c echo.Context) error {
+	userID, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only User Can Access This Feature")
+	}
+
+	err = usecase.DeleteUserByID(userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success delete user",
+	})
+}
