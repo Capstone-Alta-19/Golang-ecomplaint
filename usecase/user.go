@@ -56,13 +56,12 @@ func CreateUser(req *payload.CreateUserRequest) (*payload.CreateUserResponse, er
 	}
 
 	newUser := &model.User{
-		FullName:  req.Username,
-		Username:  req.Username,
-		Email:     req.Email,
-		Password:  string(passwordHash),
-		Phone:     req.Phone,
-		DateBirth: req.DateBirth,
-		Role:      "USER",
+		FullName: req.Username,
+		Username: req.Username,
+		Email:    req.Email,
+		Password: string(passwordHash),
+		Phone:    req.Phone,
+		Role:     "USER",
 	}
 
 	err = database.CreateUser(newUser)
