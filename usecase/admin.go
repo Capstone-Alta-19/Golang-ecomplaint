@@ -41,7 +41,7 @@ func CreateAdmin(req payload.AddAdminRequest) (*model.Admin, error) {
 func LoginAdmin(req payload.LoginAdminRequest) (*payload.LoginAdminResponse, error) {
 	admin, err := database.GetAdminByUsername(req.Username)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("username not found")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.Password))
 
