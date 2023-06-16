@@ -137,6 +137,11 @@ func DeleteComplaintByID(userID, complaintID uint) error {
 	if err != nil {
 		return err
 	}
+	err = database.DeleteNotificationByComplaintID(complaintID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
