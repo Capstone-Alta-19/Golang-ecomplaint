@@ -50,7 +50,7 @@ func GetComplaintsByUserID(userID uint, status string) ([]*model.Complaint, erro
 
 func GetComplaintByID(id uint) (*model.Complaint, error) {
 	var complaint model.Complaint
-	err := config.DB.Preload("User").Preload("Category").Preload("Comments.User").Where("id = ?", id).First(&complaint).Error
+	err := config.DB.Preload("User").Preload("Category").Preload("Feedback").Preload("Comments.User").Where("id = ?", id).First(&complaint).Error
 	if err != nil {
 		return nil, err
 	}
