@@ -39,7 +39,7 @@ func NewRoute(e *echo.Echo, db *gorm.DB) {
 	user.DELETE("/user", controller.DeleteUserController)
 	user.GET("/user/complaint/pin", controller.GetPinnedComplaintController)
 
-	user.GET("/news/:id", controller.GetNewsController)
+	user.GET("/news/:id", controller.GetNewsByIDController)
 	user.PUT("/user/:id", controller.UpdateUserController)
 	user.PUT("/user/password", controller.ChangePasswordController)
 
