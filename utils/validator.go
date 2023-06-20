@@ -32,6 +32,8 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 				validationErrors = append(validationErrors, err.Field()+" must be at least "+err.Param()+" characters")
 			case "max":
 				validationErrors = append(validationErrors, err.Field()+" must be at most "+err.Param()+" characters")
+			case "url":
+				validationErrors = append(validationErrors, err.Field()+" is not valid url")
 			default:
 				validationErrors = append(validationErrors, err.Error())
 			}

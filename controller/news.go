@@ -37,9 +37,7 @@ func CreateNewsController(c echo.Context) error {
 	payload := payload.CreateNews{}
 	c.Bind(&payload)
 	if err := c.Validate(payload); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "Invalid request payload",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	news, err := usecase.CreateNews(&payload, adminID)
