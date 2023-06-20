@@ -26,8 +26,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 				validationErrors = append(validationErrors, err.Field()+" is not valid email")
 			case "oneof":
 				validationErrors = append(validationErrors, err.Field()+" must be one of "+err.Param())
-			case "omitempty":
-				validationErrors = append(validationErrors, err.Field()+" is required")
 			case "min":
 				validationErrors = append(validationErrors, err.Field()+" must be at least "+err.Param()+" characters")
 			case "max":
