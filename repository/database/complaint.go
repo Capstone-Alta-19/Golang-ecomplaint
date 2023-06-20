@@ -2,6 +2,7 @@ package database
 
 import (
 	"capstone/config"
+	"capstone/constant"
 	"capstone/model"
 )
 
@@ -13,9 +14,33 @@ func CreateComplaint(complaint *model.Complaint) error {
 	return nil
 }
 
-func GetComplaintsByUserID(userID uint) ([]*model.Complaint, error) {
+func GetComplaintsByCategoryID(categoryID uint, sort string) ([]*model.Complaint, error) {
 	complaints := []*model.Complaint{}
-	err := config.DB.Where("user_id = ?", userID).Find(&complaints).Error
+	DB := config.DB
+	if sort == constant.Ascending {
+		DB = DB.Order("created_at asc")
+	} else if sort == constant.Descending {
+		DB = DB.Order("created_at desc")
+	}
+
+	err := DB.Preload("User").Preload("Category").Preload("Feedback").Where("category_id = ?", categoryID).Find(&complaints).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return complaints, nil
+}
+
+func GetComplaintsByUserID(userID uint, status string) ([]*model.Complaint, error) {
+	complaints := []*model.Complaint{}
+	DB := config.DB
+	DB = DB.Order("created_at desc")
+	if status == constant.StatusAll {
+		DB = DB.Where("user_id = ?", userID)
+	} else {
+		DB = DB.Where("user_id = ? AND status = ?", userID, status)
+	}
+	err := DB.Find(&complaints).Error
 	if err != nil {
 		return nil, err
 	}
@@ -25,70 +50,68 @@ func GetComplaintsByUserID(userID uint) ([]*model.Complaint, error) {
 
 func GetComplaintByID(id uint) (*model.Complaint, error) {
 	var complaint model.Complaint
-	err := config.DB.First(&complaint, id).Error
+	err := config.DB.Preload("User").Preload("Category").Preload("Feedback").Preload("Comments.User").Where("id = ?", id).First(&complaint).Error
 	if err != nil {
 		return nil, err
 	}
 	return &complaint, nil
 }
 
-func GetFeedbacksByComplaintID(complaintID string) ([]*model.Feedback, error) {
-	feedbacks := []*model.Feedback{}
-	err := config.DB.Where("complaint_id = ?", complaintID).Find(&feedbacks).Error
+func DeleteComplaint(complaint *model.Complaint) error {
+	err := config.DB.Delete(complaint).Error
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return feedbacks, nil
+	return nil
 }
 
-func GetComplaintsByCategoryAndSort(categoryID uint, sortParam string) ([]*model.Complaint, error) {
-	var complaints []*model.Complaint
-	query := config.DB.Where("category_id = ?", categoryID)
+func GetTotalComplaints() (uint, error) {
+	var total int64
+	err := config.DB.Model(&model.Complaint{}).Where("type = ?", constant.Complaint).Count(&total).Error
+	if err != nil {
+		return 0, err
+	}
+	return uint(total), nil
+}
 
-	switch sortParam {
-	case "asc":
-		query = query.Order("created_at ASC")
-	case "desc":
-		query = query.Order("created_at DESC")
-	default:
-		query = query.Order("created_at DESC")
+func GetTotalAspirations() (uint, error) {
+	var total int64
+	err := config.DB.Model(&model.Complaint{}).Where("type = ?", constant.Aspiration).Count(&total).Error
+	if err != nil {
+		return 0, err
+	}
+	return uint(total), nil
+}
+
+func GetAllComplaints(sortby, typeSort, search string, limit, offset int) ([]*model.Complaint, error) {
+	complaints := []*model.Complaint{}
+	DB := config.DB
+	if sortby == constant.Ascending {
+		DB = DB.Order("created_at asc")
+	}
+	if sortby == constant.Descending {
+		DB = DB.Order("created_at desc")
 	}
 
-	err := query.Find(&complaints).Error
+	if search != "" {
+		DB = DB.Where("title LIKE ?", "%"+search+"%")
+	}
+
+	if typeSort == constant.Complaint || typeSort == constant.Aspiration {
+		DB = DB.Where("type = ?", typeSort)
+	}
+
+	err := DB.Preload("User").Preload("Category").Preload("Feedback").Limit(limit).Offset(offset).Find(&complaints).Error
 	if err != nil {
 		return nil, err
 	}
-
 	return complaints, nil
 }
 
-func GetLikes(sortBy string, query string) ([]*model.Like, error) {
-	// Buat query sesuai dengan parameter yang diberikan
-	queryStr := "SELECT * FROM likes"
-	if query != "" {
-		queryStr += " WHERE name LIKE '%" + query + "%'"
-	}
-	if sortBy != "" {
-		queryStr += " ORDER BY " + sortBy
-	}
-
-	// Eksekusi query ke basis data
-	rows, err := db.Query(queryStr)
+func UpdateComplaint(complaint *model.Complaint) error {
+	err := config.DB.Save(complaint).Error
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer rows.Close()
-
-	likes := []*model.Like{}
-	for rows.Next() {
-		like := &model.Like{}
-		err := rows.Scan(&like.ID, &like.UserID, &like.ComplaintID)
-		if err != nil {
-			return nil, err
-		}
-		likes = append(likes, like)
-	}
-
-	return likes, nil
+	return nil
 }

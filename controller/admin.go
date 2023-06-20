@@ -41,16 +41,64 @@ func LoginAdminController(c echo.Context) error {
 	c.Bind(&req)
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Request Payload ")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	admin, err := usecase.LoginAdmin(req)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Success Login",
 		"admin":   admin,
 	})
+}
+
+func GetAdminController(c echo.Context) error {
+	role, adminID, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	if role != constant.SuperAdmin && role != constant.Admin {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	admin, err := usecase.GetAdminByID(adminID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Success Get Admin",
+		"admin":   admin,
+	})
+}
+
+func UpdateAdminController(c echo.Context) error {
+	role, adminID, err := middleware.ExtractTokenAdminId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	if role != constant.SuperAdmin && role != constant.Admin {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+	}
+
+	req := payload.UpdateAdminRequest{}
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = usecase.UpdateAdminByID(adminID, req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, "Success Updated Admin")
 }

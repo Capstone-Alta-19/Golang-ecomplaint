@@ -13,32 +13,52 @@ import (
 
 func NewRoute(e *echo.Echo, db *gorm.DB) {
 	e.Validator = &utils.CustomValidator{Validator: validator.New()}
+	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.CORS())
 
 	e.POST("/register/user", controller.RegisterUserController)
 	e.POST("/login/user", controller.LoginUserController)
 	e.POST("/login/admin", controller.LoginAdminController)
 	e.GET("/news", controller.GetNewsController)
+	e.POST("/upload", controller.UploadFileController)
 
 	// user collection
-	user := e.Group("/user", middleware.JWT([]byte(constant.SECRET_JWT)))
-	user.GET("complaint/:id", controller.GetComplaintController)
-	user.GET("feedback/:complaintID", controller.GetFeedbackController)
+	user := e.Group("/complaintz", middleware.JWT([]byte(constant.SECRET_JWT)))
 	user.POST("/complaint", controller.CreateComplaintController)
-	user.GET("/news/:id", controller.GetNewsController)
-	user.PUT("/username", controller.UpdateUserController)
-	user.PUT("/password", controller.UpdateUserController)
-	user.PUT("/name", controller.UpdateUserController)
-	user.PUT("/photoprofile", controller.UpdateUserController)
-	user.PUT("/phone", controller.UpdateUserController)
-	user.PUT("/email", controller.UpdateUserController)
+	user.GET("/complaint", controller.GetUserComplaintsByStatusController)
+	user.GET("/complaint/:id", controller.GetComplaintByIDController)
+	user.DELETE("/complaint/:id", controller.DeleteComplaintByIDController)
+	user.GET("/complaint/category/:id", controller.GetComplaintsByCategoryIDController)
+	user.POST("/complaint/:id/comment", controller.CreateCommentByComplaintIDController)
+
+	user.POST("/complaint/:id/pin", controller.PinnedComplaintByIDController)
+	user.DELETE("/complaint/:id/pin", controller.UnpinnedComplaintByIDController)
+	user.POST("/complaint/:id/like", controller.LikeByComplaintIDController)
+	user.DELETE("/complaint/:id/like", controller.UnlikeByComplaintIDController)
+	user.GET("/user", controller.GetUserProfileController)
+	user.DELETE("/user", controller.DeleteUserController)
+	user.GET("/user/complaint/pin", controller.GetPinnedComplaintController)
+
+	user.GET("/news/:id", controller.GetNewsByIDController)
+	user.PUT("/user/:id", controller.UpdateUserController)
+	user.PUT("/user/password", controller.ChangePasswordController)
 
 	// admin collection
-	admin := e.Group("/admin", middleware.JWT([]byte(constant.SECRET_JWT)))
-	admin.POST("/add", controller.AddAdminController)
-	admin.POST("/news", controller.CreateNewsController)
-	admin.GET("/news/:id", controller.GetNewsController)
-	admin.DELETE("/news", controller.DeleteNewsController)
-	admin.PUT("/news", controller.UpdateNewsController)
+	admin := e.Group("/dashboard", middleware.JWT([]byte(constant.SECRET_JWT)))
+	admin.GET("/notification", controller.GetNotificationController)
+	admin.POST("/admin", controller.AddAdminController)
+	admin.GET("/admin", controller.GetAdminController)
+	admin.PUT("/admin", controller.UpdateAdminController)
 
-	admin.GET("/complaint/:id", controller.GetComplaintByIDController)
+	admin.POST("/news", controller.CreateNewsController)
+	admin.DELETE("/news/:id", controller.DeleteNewsController)
+	admin.PUT("/news/:id", controller.UpdateNewsController)
+
+	admin.GET("", controller.GetTotalComplaintsController)
+	admin.GET("/complaint", controller.GetAllComplaintsController)
+	admin.GET("/complaint/export", controller.ExportComplaintController)
+	admin.POST("/complaint/:id", controller.CreateFeedbackByComplaintIDController)
+	admin.GET("/complaint/:id", controller.AdminGetComplaintByIDController)
+	admin.PUT("/complaint/:id", controller.UpdateComplaintController)
+	admin.DELETE("/complaint/:id", controller.AdminDeleteComplaintByIDController)
 }

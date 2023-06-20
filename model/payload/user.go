@@ -3,7 +3,7 @@ package payload
 type CreateUserRequest struct {
 	Username        string `json:"username" validate:"required"`
 	Email           string `json:"email" validate:"required,email"`
-	Phone           string `json:"phone" validate:"required"`
+	Phone           string `json:"phone" validate:"required,min=10,max=13"`
 	Password        string `json:"password" validate:"required,min=6"`
 	ConfirmPassword string `json:"confirm_password" validate:"required"`
 }
@@ -23,4 +23,19 @@ type LoginUserResponse struct {
 
 type OtpEmailRequest struct {
 	Email string `json:"email"`
+}
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" validate:"required,min=6"`
+	NewPassword string `json:"new_password" validate:"required,min=6"`
+}
+
+type GetUserProfileResponse struct {
+	ID           uint    `json:"id"`
+	PhotoProfile *string `json:"photo_profile"`
+	FullName     string  `json:"full_name"`
+	Laporan      uint    `json:"laporan"`
+	Pending      uint    `json:"pending"`
+	Proccess     uint    `json:"proccess"`
+	Resolved     uint    `json:"resolved"`
 }
