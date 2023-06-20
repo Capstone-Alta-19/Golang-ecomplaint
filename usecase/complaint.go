@@ -21,8 +21,8 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		UserID:      UserID,
 		Description: req.Description,
 		Type:        req.Type,
-		PhotoURL:    req.PhotoURL,
-		VideoURL:    req.VideoURL,
+		PhotoURL:    *req.PhotoURL,
+		VideoURL:    *req.VideoURL,
 		CategoryID:  category.ID,
 		IsPublic:    *req.IsPublic,
 		Status:      constant.StatusPending,
@@ -133,10 +133,23 @@ func DeleteComplaintByID(userID, complaintID uint) error {
 		return errors.New("you are not the owner of this complaint")
 	}
 
+	pinned, err := database.GetPinnedComplaintsByComplaintId(complaintID)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	for _, complaint := range pinned {
+		err = database.DeletePinnedComplaint(&complaint)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = database.DeleteComplaint(complaint)
 	if err != nil {
 		return err
 	}
+
 	err = database.DeleteNotificationByComplaintID(complaintID)
 	if err != nil {
 		return err

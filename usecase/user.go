@@ -161,6 +161,43 @@ func DeleteUserByID(userID uint) error {
 	if err != nil {
 		return err
 	}
+
+	complaints, err := database.GetComplaintsByUserID(user.ID, constant.StatusAll)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	for _, complaint := range complaints {
+		err = database.DeleteComplaint(complaint)
+		if err != nil {
+			return err
+		}
+	}
+
+	comments, err := database.GetCommentByUserID(user.ID)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	for _, comment := range comments {
+		err = database.DeleteComment(comment)
+		if err != nil {
+			return err
+		}
+	}
+
+	pinned, err := database.GetPinnedComplaintsByUserId(user.ID)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	for _, pin := range pinned {
+		err = database.DeletePinnedComplaint(&pin)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = database.DeleteUser(user)
 	if err != nil {
 		return err
