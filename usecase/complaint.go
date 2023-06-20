@@ -24,7 +24,7 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		PhotoURL:    req.PhotoURL,
 		VideoURL:    req.VideoURL,
 		CategoryID:  category.ID,
-		IsPublic:    req.IsPublic,
+		IsPublic:    *req.IsPublic,
 		Status:      constant.StatusPending,
 	}
 	err = database.CreateComplaint(resp)
