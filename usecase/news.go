@@ -4,20 +4,23 @@ import (
 	"capstone/model"
 	"capstone/model/payload"
 	"capstone/repository/database"
+	"capstone/utils"
 	"errors"
 	"fmt"
 	"time"
 )
 
-func CreateNews(req *payload.CreateNews) (*model.News, error) {
+func CreateNews(req *payload.CreateNews, adminID uint) (*model.News, error) {
 	category, err := database.GetCategoryByID(req.CategoryID)
 	if err != nil {
 		return nil, errors.New("category not found")
 	}
 	resp := &model.News{
 		NewsName:    req.NewsName,
+		PhotoURL:    req.PhotoURL,
 		Description: req.Description,
 		CategoryID:  category.ID,
+		AdminID:     adminID,
 		Time:        time.Now(),
 	}
 	err = database.CreateNews(resp)
@@ -56,4 +59,40 @@ func UpdateNews(news *model.News) (err error) {
 	}
 
 	return
+}
+
+func GetNewsByID(newsID uint) (*payload.GetNewsByIDResponse, error) {
+	news, err := database.GetNewsByID(newsID)
+	if err != nil {
+		return nil, errors.New("news not found")
+	}
+
+	fiveNews, err := database.GetFiveNews()
+	if err != nil {
+		return nil, err
+	}
+
+	newsList := []payload.NewsList{}
+	for _, v := range fiveNews {
+		if v.ID != news.ID {
+			newsList = append(newsList, payload.NewsList{
+				ID:       v.ID,
+				NewsName: v.NewsName,
+				PhotoURL: v.PhotoURL,
+			})
+		}
+	}
+
+	resp := &payload.GetNewsByIDResponse{
+		ID:          news.ID,
+		NewsName:    news.NewsName,
+		PhotoURL:    news.PhotoURL,
+		Description: news.Description,
+		Admin:       news.Admin.Name,
+		Category:    news.Category.Name,
+		CreatedAt:   utils.ConvertDateToIndonesia(news.Time.Format("Monday, 02 Januari 2006")),
+		NewsList:    newsList,
+	}
+
+	return resp, nil
 }

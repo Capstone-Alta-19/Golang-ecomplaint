@@ -20,7 +20,7 @@ func GetNotification() ([]*payload.GetNotificationResponse, error) {
 			Category:     v.Complaint.Category.Name,
 			Description:  v.Complaint.Description,
 			ComplaintID:  v.ComplaintID,
-			CreatedAt:    v.CreatedAt.Format("02 January 2006"),
+			CreatedAt:    v.CreatedAt.Format("02 Januari 2006"),
 		})
 	}
 	return resp, nil

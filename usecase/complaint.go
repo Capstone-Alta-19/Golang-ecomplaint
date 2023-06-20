@@ -24,7 +24,7 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		PhotoURL:    req.PhotoURL,
 		VideoURL:    req.VideoURL,
 		CategoryID:  category.ID,
-		IsPublic:    req.IsPublic,
+		IsPublic:    *req.IsPublic,
 		Status:      constant.StatusPending,
 	}
 	err = database.CreateComplaint(resp)
@@ -119,7 +119,7 @@ func GetComplaintByID(id uint) (*payload.GetComplaintByIDResponse, error) {
 		PhotoURL:    utils.ConvertToNullString(complaint.PhotoURL),
 		VideoURL:    utils.ConvertToNullString(complaint.VideoURL),
 		IsPublic:    complaint.IsPublic,
-		CreatedAt:   complaint.CreatedAt.Format("02 January 2006"),
+		CreatedAt:   complaint.CreatedAt.Format("02 Januari 2006"),
 	}
 	return &resp, nil
 }
