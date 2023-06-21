@@ -21,8 +21,8 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		UserID:      UserID,
 		Description: req.Description,
 		Type:        req.Type,
-		PhotoURL:    *req.PhotoURL,
-		VideoURL:    *req.VideoURL,
+		PhotoURL:    req.PhotoURL,
+		VideoURL:    req.VideoURL,
 		CategoryID:  category.ID,
 		IsPublic:    *req.IsPublic,
 		Status:      constant.StatusPending,
@@ -138,10 +138,12 @@ func DeleteComplaintByID(userID, complaintID uint) error {
 		return err
 	}
 
-	for _, complaint := range pinned {
-		err = database.DeletePinnedComplaint(&complaint)
-		if err != nil {
-			return err
+	if len(pinned) > 0 {
+		for _, complaint := range pinned {
+			err = database.DeletePinnedComplaint(&complaint)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

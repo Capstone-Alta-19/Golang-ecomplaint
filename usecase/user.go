@@ -167,10 +167,12 @@ func DeleteUserByID(userID uint) error {
 		return err
 	}
 
-	for _, complaint := range complaints {
-		err = database.DeleteComplaint(complaint)
-		if err != nil {
-			return err
+	if len(complaints) > 0 {
+		for _, complaint := range complaints {
+			err = database.DeleteComplaint(complaint)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -179,10 +181,12 @@ func DeleteUserByID(userID uint) error {
 		return err
 	}
 
-	for _, comment := range comments {
-		err = database.DeleteComment(comment)
-		if err != nil {
-			return err
+	if len(comments) > 0 {
+		for _, comment := range comments {
+			err = database.DeleteComment(comment)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -191,10 +195,12 @@ func DeleteUserByID(userID uint) error {
 		return err
 	}
 
-	for _, pin := range pinned {
-		err = database.DeletePinnedComplaint(&pin)
-		if err != nil {
-			return err
+	if len(pinned) > 0 {
+		for _, pin := range pinned {
+			err = database.DeletePinnedComplaint(&pin)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
