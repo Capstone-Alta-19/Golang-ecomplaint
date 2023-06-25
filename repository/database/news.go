@@ -13,7 +13,18 @@ func CreateNews(news *model.News) error {
 }
 
 func GetListNews() (news []model.News, err error) {
-	if err = config.DB.Find(&news).Error; err != nil {
+	DB := config.DB
+	DB = DB.Order("created_at desc")
+	if err = DB.Find(&news).Error; err != nil {
+		return
+	}
+	return
+}
+
+func GetFiveNews() (news []model.News, err error) {
+	DB := config.DB
+	DB = DB.Order("created_at desc").Limit(5)
+	if err = DB.Find(&news).Error; err != nil {
 		return
 	}
 	return
@@ -31,4 +42,13 @@ func UpdateNews(news *model.News) error {
 		return err
 	}
 	return nil
+}
+
+func GetNewsByID(id uint) (*model.News, error) {
+	var news model.News
+	err := config.DB.Preload("Admin").Preload("Category").Where("id = ?", id).First(&news).Error
+	if err != nil {
+		return nil, err
+	}
+	return &news, nil
 }

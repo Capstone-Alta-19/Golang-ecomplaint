@@ -25,24 +25,22 @@ func GetNewsController(c echo.Context) error {
 }
 
 func CreateNewsController(c echo.Context) error {
-	role, _, err := middleware.ExtractTokenAdminId(c)
+	role, adminID, err := middleware.ExtractTokenAdminId(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
+		return echo.NewHTTPError(http.StatusUnauthorized)
 	}
 
-	if role != constant.Admin {
+	if role != constant.Admin && role != constant.SuperAdmin {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Only Admin Can Access This Feature")
 	}
 
 	payload := payload.CreateNews{}
 	c.Bind(&payload)
 	if err := c.Validate(payload); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
-			"message": "Invalid request payload",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	news, err := usecase.CreateNews(&payload)
+	news, err := usecase.CreateNews(&payload, adminID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -94,5 +92,27 @@ func UpdateNewsController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success update news",
+	})
+}
+
+func GetNewsByIDController(c echo.Context) error {
+	_, err := middleware.ExtractTokenUserId(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Only User Can Access This Feature")
+	}
+
+	newsID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	news, err := usecase.GetNewsByID(uint(newsID))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success",
+		"news":   news,
 	})
 }

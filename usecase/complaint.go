@@ -24,7 +24,7 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 		PhotoURL:    req.PhotoURL,
 		VideoURL:    req.VideoURL,
 		CategoryID:  category.ID,
-		IsPublic:    req.IsPublic,
+		IsPublic:    *req.IsPublic,
 		Status:      constant.StatusPending,
 	}
 	err = database.CreateComplaint(resp)
@@ -45,6 +45,11 @@ func CreateComplaint(UserID uint, req *payload.CreateComplaintRequest) (*model.C
 }
 
 func GetComplaintsByCategoryID(categoryID uint, sortOrder string) ([]*payload.GetComplaintByCategoryIDResponse, error) {
+	_, err := database.GetCategoryByID(categoryID)
+	if err != nil {
+		return nil, errors.New("category not found")
+	}
+
 	complaints, err := database.GetComplaintsByCategoryID(categoryID, sortOrder)
 	if err != nil {
 		return nil, err
@@ -114,7 +119,7 @@ func GetComplaintByID(id uint) (*payload.GetComplaintByIDResponse, error) {
 		PhotoURL:    utils.ConvertToNullString(complaint.PhotoURL),
 		VideoURL:    utils.ConvertToNullString(complaint.VideoURL),
 		IsPublic:    complaint.IsPublic,
-		CreatedAt:   complaint.CreatedAt.Format("02 January 2006"),
+		CreatedAt:   complaint.CreatedAt.Format("02 Januari 2006"),
 	}
 	return &resp, nil
 }
@@ -128,10 +133,30 @@ func DeleteComplaintByID(userID, complaintID uint) error {
 		return errors.New("you are not the owner of this complaint")
 	}
 
+	pinned, err := database.GetPinnedComplaintsByComplaintId(complaintID)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	if len(pinned) > 0 {
+		for _, complaint := range pinned {
+			err = database.DeletePinnedComplaint(&complaint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	err = database.DeleteComplaint(complaint)
 	if err != nil {
 		return err
 	}
+
+	err = database.DeleteNotificationByComplaintID(complaintID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -142,6 +167,11 @@ func AdminDeleteComplaintByID(complaintID uint) error {
 	}
 
 	err = database.DeleteComplaint(complaint)
+	if err != nil {
+		return err
+	}
+
+	err = database.DeleteNotificationByComplaintID(complaintID)
 	if err != nil {
 		return err
 	}

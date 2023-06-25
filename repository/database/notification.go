@@ -24,3 +24,12 @@ func GetNotification() ([]*model.Notification, error) {
 	}
 	return notifications, nil
 }
+
+func DeleteNotificationByComplaintID(complaintID uint) error {
+	var notification model.Notification
+	err := config.DB.Where("complaint_id = ?", complaintID).Delete(&notification).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

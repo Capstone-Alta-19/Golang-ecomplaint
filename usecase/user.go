@@ -18,7 +18,7 @@ func LoginUser(usernameOrEmail, password string) (*payload.LoginUserResponse, er
 	user, err := database.GetUserByUsernameOrEmail(usernameOrEmail)
 	if err != nil {
 		fmt.Println("LoginUser: Error getting user from the database")
-		return nil, err
+		return nil, errors.New("username or email not found")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
@@ -161,6 +161,49 @@ func DeleteUserByID(userID uint) error {
 	if err != nil {
 		return err
 	}
+
+	complaints, err := database.GetComplaintsByUserID(user.ID, constant.StatusAll)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	if len(complaints) > 0 {
+		for _, complaint := range complaints {
+			err = database.DeleteComplaint(complaint)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	comments, err := database.GetCommentByUserID(user.ID)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	if len(comments) > 0 {
+		for _, comment := range comments {
+			err = database.DeleteComment(comment)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	pinned, err := database.GetPinnedComplaintsByUserId(user.ID)
+	if err != nil && err != errors.New("record not found") {
+		return err
+	}
+
+	if len(pinned) > 0 {
+		for _, pin := range pinned {
+			err = database.DeletePinnedComplaint(&pin)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	err = database.DeleteUser(user)
 	if err != nil {
 		return err

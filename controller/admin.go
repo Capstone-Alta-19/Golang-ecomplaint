@@ -41,12 +41,12 @@ func LoginAdminController(c echo.Context) error {
 	c.Bind(&req)
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Request Payload ")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	admin, err := usecase.LoginAdmin(req)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
