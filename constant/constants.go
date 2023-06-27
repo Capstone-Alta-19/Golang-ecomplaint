@@ -1,10 +1,14 @@
 package constant
 
 const SECRET_JWT = "123"
-
-const (
-	// Twilio configuration
-	twilioAccountSid = "YOUR_TWILIO_ACCOUNT_SID"
-	twilioAuthToken  = "YOUR_TWILIO_AUTH_TOKEN"
-	twilioFromNumber = "YOUR_TWILIO_PHONE_NUMBER"
-)
+const Admin = "Admin"
+const SuperAdmin = "Super Admin"
+const StatusPending = "Pending"
+const StatusProccess = "Proccess"
+const StatusResolved = "Resolved"
+const StatusAll = "All"
+const AppName = "Complainz"
+const Ascending = "asc"
+const Descending = "desc"
+const Complaint = "Complaint"
+const Aspiration = "Aspiration"
