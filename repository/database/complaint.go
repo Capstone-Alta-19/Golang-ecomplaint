@@ -94,7 +94,7 @@ func GetAllComplaints(sortby, typeSort, search string, limit, offset int) ([]*mo
 	}
 
 	if search != "" {
-		DB = DB.Where("title LIKE ?", "%"+search+"%")
+		DB = DB.Where("description LIKE ?", "%"+search+"%")
 	}
 
 	if typeSort == constant.Complaint || typeSort == constant.Aspiration {
